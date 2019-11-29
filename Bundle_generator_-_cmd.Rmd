@@ -1,0 +1,1159 @@
+---
+output: 
+  rmarkdown::html_document
+runtime: shiny
+params:
+  package_repository: "https://cloud.r-project.org"
+---
+
+```{r README - Knitr configuration, child = "Common_knitr_configuration.Rmd", include = FALSE}
+```
+
+# TODO
+- If you use R on Windows, you have to use the function "zip::zip" instead of the function "zip" to create a zip archive.
+
+# Template for CodaLab competition bundles
+
+## I. Package dependencies
+- R.utils (to extract the arguments from the command line)
+- rmarkdown (to generate the R and html files from Rmd file)
+
+```{r README - Package dependencies, echo = FALSE}
+auto_install <- readline(prompt = "Should the dependencies be automatically checked and installed ? (format : TRUE / FALSE) [default = TRUE] : ")
+auto_install <- as.logical(x = auto_install)
+if ( is.na(x = auto_install) ) {
+    auto_install <- TRUE
+}
+print(x = auto_install)
+if ( auto_install ) {
+    installed_packages <- installed.packages( )
+    for (package in c("R.utils", "rmarkdown", "registry", "pkgmaker", "rngtools", "NMF") ) { ## the packages "registry", "pkgmaker", "rngtools", "NMF" have to be removed : used only for the current test.
+        if ( !{ package %in% installed_packages } ) {
+            print(x = paste("Installation of ", package, sep = "") )
+            install.packages(
+                pkgs = package
+              , repos = params$package_repository
+            )
+        } else {
+            print(x = paste(package, " is installed.", sep = "") )
+        }
+        ## library(
+        ##     package = package
+        ##   , character.only = TRUE
+        ##   , logical.return = TRUE
+        ## )
+    }
+    remove(list = c("installed_packages", "package") )
+}
+remove(list = c("auto_install") )
+```
+   
+## II. Script options
+
+```{r README - Command line arguments, include = FALSE}
+# User variables :
+configuration <- R.utils::commandArgs(
+    trailingOnly = FALSE
+  , asValues = TRUE
+  , unique = TRUE
+)
+configurationYaml <- NULL
+```
+
+Name of the directory to save the challenge : string between double quotes whitout white space
+```{r README - Challenge name, echo = FALSE, comment = ""}
+if ( is.null(x = configuration$name) ) {
+    configuration$name <- readline(prompt = "Name of the challenge (format : string) [default : template] : ")
+    if ( configuration$name == "" ) {
+        configuration$name <- "template"
+    }
+}
+print(x = configuration$name)
+if ( !dir.exists(paths = configuration$name) ) {
+    dir.create(path = configuration$name)
+}
+```
+    
+## III. Competition properties
+
+### 1. General Information using the YAML file
+- `title` : string between double quotes
+```{r README - Title, echo = FALSE}
+if ( is.null(x = configuration$title) ) {
+    configurationYaml$title <- readline(prompt = "Title (format : string) [default = TEMPLATE : title.] : ")
+}
+if ( configurationYaml$title == "" ) {
+    configurationYaml$title <- "TEMPLATE : title."
+}
+print(x = configurationYaml$title)
+```
+
+- `description` : string between double quotes (max 256 characters)
+```{r README - Description, echo = FALSE}
+if ( is.null(x = configuration$description) ) {
+    configurationYaml$description <- readline(prompt = "Description (format : string, max 256 characters) [default = TEMPLATE : description.] : ")
+}
+if ( configurationYaml$description == "" ) {
+    configurationYaml$description <- "TEMPLATE : description."
+}
+print(x = configurationYaml$description)
+```
+
+- `disallow_leaderboard_modifying` : TRUE / FALSE. If TRUE, submissions cannot be changed by the participants.
+```{r README - Disallow leaderboard modifying, echo = FALSE}
+if ( is.null(x = configuration$disallow_leaderboard_modifying) ) {
+    configurationYaml$disallow_leaderboard_modifying <- readline(prompt = "Disallow leaderboard modifying (format : TRUE / FALSE) [default = TRUE] : ")
+}
+configurationYaml$disallow_leaderboard_modifying <- as.logical(x = configurationYaml$disallow_leaderboard_modifying)
+if ( is.na(x = configurationYaml$disallow_leaderboard_modifying) ) {
+    configurationYaml$disallow_leaderboard_modifying <- TRUE
+}
+print(x = configurationYaml$disallow_leaderboard_modifying)
+```
+
+- `force_submission_to_leaderboard` : TRUE / FALSE. If FALSE, participants must submit manually. Otherwise, normally the last submission made is the one displayed on the leaderboard.
+```{r README - Force submission to leaderboard, echo = FALSE}
+if ( is.null(x = configuration$force_submission_to_leaderboard) ) {
+    configurationYaml$force_submission_to_leaderboard <- readline(prompt = "Force submission to leaderboard (format : TRUE / FALSE) [default = TRUE] : ")
+}
+configurationYaml$force_submission_to_leaderboard <- as.logical(x = configurationYaml$force_submission_to_leaderboard)
+if ( is.na(x = configurationYaml$force_submission_to_leaderboard) ) {
+    configurationYaml$force_submission_to_leaderboard <- TRUE
+}
+print(x = configurationYaml$force_submission_to_leaderboard)
+```
+
+- `image` : file name, .jpg or .png; competition logo (it is called logo in the editor)
+```{r README - Image, echo = FALSE}
+if ( is.null(x = configuration$image) ) {
+    configurationYaml$image <- readline(prompt = "Competition logo (format : filename with .jpg or .png extension)  [default = logo.png] : ")
+}
+if ( configurationYaml$image == "" ) {
+    configurationYaml$image <- "logo.png"
+}
+print(x = configurationYaml$image)
+file.copy(
+    from      = configurationYaml$image
+  , to        = paste(configuration$name, .Platform$file.sep, configurationYaml$image, sep = "")
+  , overwrite = TRUE
+)
+```
+
+- `has_registration` : TRUE / FALSE. If TRUE, organizer must approve participants.
+```{r README - Has registration, echo = FALSE}
+if ( is.null(x = configuration$has_registration) ) {
+    configurationYaml$has_registration <- readline(prompt = "Has registration (format : TRUE / FALSE) [default = TRUE] : ")
+}
+configurationYaml$has_registration <- as.logical(x = configurationYaml$has_registration)
+if ( is.na(x = configurationYaml$has_registration) ) {
+    configurationYaml$has_registration <- TRUE
+}
+print(x = configurationYaml$has_registration)
+```
+
+- `start_date` : YYYY-MM-DD.
+```{r README - Start date, echo = FALSE}
+if ( is.null(x = configuration$start_date) ) {
+    configurationYaml$start_date <- readline(prompt = paste("Start_Date (format : YYYY-MM-DD) [default = ", Sys.Date( ), "] : ", sep = "") )
+}
+if ( configurationYaml$start_date == "" ) {
+    configurationYaml$start_date <- as.character(x = Sys.Date( ) )
+}
+print(x = configurationYaml$start_date)
+```
+
+- `end_date` : YYYY-MM-DD. No end date if left blank
+```{r README - End date, echo = FALSE}
+if ( is.null(x = configuration$end_date) ) {
+    configurationYaml$end_date <- readline(prompt = paste("End_Date (format : YYYY-MM-DD) [default = ", Sys.Date( ) + 365, "] : ", sep = "") )
+}
+if ( configurationYaml$end_date == "" ) {
+    configurationYaml$end_date <- as.character(x = Sys.Date( ) + 365)
+}
+print(x = configurationYaml$end_date)
+```
+
+- `enable_detailed_results` : TRUE / FALSE. TRUE if html file written. The scoring program may optionally also return a file scores.html containing detailed results (in free format), which will be linked from the leaderboard in the column "Detailed Results". This will only work if "enable_detailed_results" is set to TRUE.
+```{r README - Enable detailed results, echo = FALSE}
+if ( is.null(x = configuration$enable_detailed_results) ) {
+    configurationYaml$enable_detailed_results <- readline(prompt = "Enable detailed results (format : TRUE / FALSE) [default = TRUE] : ")
+}
+configurationYaml$enable_detailed_results <- as.logical(x = configurationYaml$enable_detailed_results)
+if ( is.na(x = configurationYaml$enable_detailed_results) ) {
+    configurationYaml$enable_detailed_results <- TRUE
+}
+print(x = configurationYaml$enable_detailed_results)
+```
+
+- `admin_names` :  Comma separated list of Codalab IDs of co-organizers It is called admins in the editor.
+```{r README - Admin names, echo = FALSE}
+if ( is.null(x = configuration$admin_names) ) {
+    configurationYaml$admin_names <- readline(prompt = paste("Admin names (format : comma separated list) [default = ", Sys.info( )[ "user" ], "] : ", sep = "") )
+}
+if ( configurationYaml$admin_names == "" ) {
+    configurationYaml$admin_names <- Sys.info( )[ "user" ]
+}
+print(x = configurationYaml$admin_names)
+```
+
+- `html` :
+  ```{r README - Html files, include = FALSE}
+  configurationYaml$html <- NULL
+  ```
+  
+  - `overview` : overview.html file : detailed competition description.
+  ```{r README - Html overview, echo = FALSE}
+  if ( is.null(x = configuration$html_overview) ) {
+      configurationYaml$html$overview <- readline(prompt = "Html file : overview (format : filename with html extension) [default = overview.html] : ")
+  }
+  if ( configurationYaml$html$overview == "" ) {
+      configurationYaml$html$overview <- "overview.html"
+  }
+  print(x = configurationYaml$html$overview)
+  ```
+
+  - `evaluation` : evaluation.html : Instructions and evaluation metrics.
+  ```{r README - Html evaluation, echo = FALSE}
+  if ( is.null(x = configuration$html_evaluation) ) {
+      configurationYaml$html$evaluation <- readline(prompt = "Html file : evaluation (format : filename with html extension) [default = evaluation.html] : ")
+  }
+  if ( configurationYaml$html$evaluation == "" ) {
+      configurationYaml$html$evaluation <- "evaluation.html"
+  }
+  print(x = configurationYaml$html$evaluation)
+  ```
+
+  - `terms` : terms_and_conditions.html : Rules and prizes.
+  ```{r README - Html terms, echo = FALSE}
+  if ( is.null(x = configuration$html_terms_and_conditions) ) {
+      configurationYaml$html$terms <- readline(prompt = "Html file : terms and conditions (format : filename with html extension) [default = terms_and_conditions.html] : ")
+  }
+  if ( configurationYaml$html$terms == "" ) {
+      configurationYaml$html$terms <- "terms_and_conditions.html"
+  }
+  print(x = configurationYaml$html$terms)
+  ```
+
+  - `data` : data.html : Dataset description.
+  ```{r README - Html data, echo = FALSE}
+  if ( is.null(x = configuration$html_data) ) {
+      configurationYaml$html$data <- readline(prompt = "Html file : data (format : filename with html extension) [default = data.html] : ")
+  }
+  if ( configurationYaml$html$data == "" ) {
+      configurationYaml$html$data <- "data.html"
+  }
+  print(x = configurationYaml$html$data)
+  ```
+
+  - additional pages (optional).
+  ```{r README - Additional html pages, echo = FALSE}
+  if ( is.null(x = configuration$html_additional_page_number) ) {
+      configuration$html_additional_page_number <- readline(prompt = "Number of additional html pages (format : integer) [default = 0] : ")
+  }
+  configuration$html_additional_page_number <- as.integer(x = configuration$html_additional_page_number)
+  if ( is.na(x = configuration$html_additional_page_number) ) {
+      configuration$html_additional_page_number <- 0
+  }
+  print(x = paste("Additional page number : ", configuration$html_additional_page_number, sep = "") )
+  
+  for ( additional_page_idx in seq_len(length.out = configuration$html_additional_page_number ) ) {
+      html_additional_page_idx_c <- as.character(x = html_additional_page_idx)
+      html_additional_page_idx_name  <- paste("html_additional_pages", html_additional_page_idx, "name", sep = "_" )
+      html_additional_page_idx_path  <- paste("html_additional_pages", html_additional_page_idx, "name", sep = "_" )
+      cat( paste("Html_Additional_Page ", html_additional_page_idx, " :\n", sep = "") )
+      
+      cat( paste("  - `name` : String. Name of the tab associated to the additional html page n°. ", additional_page_idx, "\n", sep = "") )
+      if ( is.null(x = configuration[[ html_additional_page_idx_name ]] ) ) {
+          configuration[[ html_additional_page_idx_name ]] <- readline(prompt = paste("Name (format : string) [default = additional_html_page ", html_additional_page_idx, "] : ") )
+      }
+      if ( configuration[[ html_additional_page_idx_name ]] == "" ) {
+          configuration[[ html_additional_page_idx_name ]] <- paste("additional_html_page ", html_additional_page_idx, sep = "")
+      }
+      print(x = configuration[[ html_additional_page_idx_name ]])
+      
+      cat( paste("  - `path` : String. Filename of the additional html page n°. ", additional_page_idx, "\n", sep = "") )
+      if ( is.null(x = configuration[[ html_additional_page_idx_path ]] ) ) {
+          configuration[[ html_additional_page_idx_path ]] <- readline(prompt = paste("Filename (format : string) [default = additional_html_page ", html_additional_page_idx, ".html] : ") )
+      }
+      if ( configuration[[ html_additional_page_idx_path ]] == "" ) {
+          configuration[[ html_additional_page_idx_path ]] <- paste("additional_html_page ", html_additional_page_idx, ".html", sep = "")
+      }
+      print(x = configuration[[ html_additional_page_idx_path ]])
+
+      configurationYaml$html[ configuration[[ html_additional_page_idx_name ]] ] <- configuration[[ html_additional_page_idx_path ]]
+      remove(list = c("html_additional_page_idx_c", "html_additional_page_idx_name", "html_additional_page_idx_path") )
+  }
+  ```
+
+### 2. Some properties of competitions cannot be specified in the YAML file. However, they are available from the editor.
+
+- `Queue` : Queue selected to send execution jobs.
+- `Publicly Available` : Checked if the competition is published.
+- `Reward` : Amount of competition prize.
+- `Allow teams` : Checked if profile-declared [team](https://github.com/codalab/codalab-competitions/wiki/Organizer_Teams) name is used. (Profile teams are global to all competitions).
+- `Enable per submission metadata` : If checked, when submitting an entry, competitors will be asked for Team name, Method name, Method description, etc.
+- `Allow sharing of public submissions` : If checked, participants will be able to share their submissions with others.
+- `Enable forum` : If checked, participants will be able to make posts to the [forum](https://github.com/codalab/codalab-competitions/wiki/Organizer_Forum).
+- `Anonymous leaderboard` : If checked, participants' names will not appear in the leaderboard.
+- `Enable Competition level teams` : If checked, per competition [team](https://github.com/codalab/codalab-competitions/wiki/Organizer_Teams) registration will be required for participation.
+- `Allow Organizer Teams` : the organizers can make teams ? [TODO : update the documentation]
+- `Organizers need to approve the new team` : If checked, the organizers will need to approve the [teams](https://github.com/codalab/codalab-competitions/wiki/Organizer_Teams).
+- `competition_docker_image` : Optionally specify your own docker (default is codalab/codalab-legacy:latest, see list in [docker hub](https://hub.docker.com/explore/), or create your own docker).
+- `Hide Top Three Leaderboard` : hide the top three participants on the leaderboard. [TODO : update the documentation]
+- `Hide Chart` : hide the chart from the bottom of the competition [TODO : update the documentation]
+
+### 3. Phase properties using the YAML file
+
+- `phases` :
+  ```{r README - Phases, echo = FALSE}
+  configurationYaml$phases <- NULL
+
+  if ( is.null(x = configuration$phase_number) ) {
+      configuration$phase_number <- readline(prompt = "Phase number (format : integer) [default = 1] : ")
+  }
+  configuration$phase_number <- as.integer(x = configuration$phase_number)
+  if ( is.na(x = configuration$phase_number) ) {
+      configuration$phase_number <- 1
+  }
+  print(x = paste("Phase number : ", configuration$phase_number, sep = "") )
+  
+  for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
+      phase_idx_c <- as.character(x = phase_idx)
+      configurationYaml$phases[ phase_idx_c ] <- NULL
+      cat( paste("Phase ", phase_idx, " :\n", sep = "") )
+      
+      cat("  - `phasenumber` : Positive integer.\n")
+      configurationYaml$phases[[ phase_idx_c ]]$phasenumber <- phase_idx
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$phasenumber)
+      
+      cat("  - `label` : String. Label used to identify the phase.\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "label", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$label <- readline(prompt = paste("Label (format : string) [default = phase ", phase_idx, "] : ") )
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$label == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$label <- paste("Phase ", phase_idx, sep = "")
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$label)
+
+      cat("  - `description` : String. Short phase description\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "description", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$description <- readline(prompt = "Description (format : string) [default = TEMPLATE : phase description.] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$description == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$description <- "TEMPLATE : phase description."
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$description)
+
+      cat("  - `start_date` : YYYY-MM-DD, Phase start (ends when new phase begins)\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "start_date", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$start_date <- readline(prompt = paste("Start date (format : YYYY-MM-DD) [default : ", Sys.Date( ), "] : ", sep = "") )
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$start_date == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$start_date <- as.character(x = Sys.Date( ) )
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$start_date)
+
+      cat("  - `max_submissions` : positive integer. Maximum submissions per user.\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "max_submissions", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$max_submissions <- readline(prompt = "Max submissions per user (format : integer) [default : 100] : ")
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$max_submissions <- as.integer(x = configurationYaml$phases[[ phase_idx_c ]]$max_submissions)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$max_submissions) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$max_submissions <- as.integer(x = 100)
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$max_submissions)
+
+      cat("  - `max_submissions_per_day` : positive integer. Maximum submissions per user and per day.\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "max_submissions_per_day", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$max_submissions_per_day <- readline(prompt = "Max submissions per day (format : integer) [default : 100] : ")
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$max_submissions_per_day <- as.integer(x = configurationYaml$phases[[ phase_idx_c ]]$max_submissions_per_day)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$max_submissions_per_day) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$max_submissions_per_day <- as.integer(x = 100)
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$max_submissions_per_day)
+
+      cat("  - `execution_time_limit` : positive integer. Maximum execution time of the submission (in seconds).\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "execution_time_limit", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$execution_time_limit <- readline(prompt = "Maximum execution time of the submission in seconds (format : integer) [default : 300] : ")
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$execution_time_limit <- as.integer(x = configurationYaml$phases[[ phase_idx_c ]]$execution_time_limit)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$execution_time_limit) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$execution_time_limit <- as.integer(x = 300)
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$execution_time_limit)
+
+      cat("  - `color` : Tab colors, one of: white, orange, yellow, green, blue, purple\n")
+      color_temp <- c("white", "orange", "yellow", "green", "blue", "purple")[ phase_idx %% 6 ]
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "color", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$color <- readline(prompt = paste("Color (format : white / orange / yellow / green / blue / purple) [default : ", color_temp, "] : ") )
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$color == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$color <- color_temp
+      }
+      remove(list = "color_temp")
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$color)
+      
+      cat("  - `is_scoring_only` : TRUE / FALSE. If TRUE no code submission. (Results Scoring Only is the name in the editor)\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "is_scoring_only", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$is_scoring_only <- readline(prompt = paste("Is scoring only (format : TRUE / FALSE) [default : FALSE] : ") )
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$is_scoring_only <- as.logical(x = configurationYaml$phases[[ phase_idx_c ]]$is_scoring_only)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$is_scoring_only) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$is_scoring_only <- FALSE
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$is_scoring_only) 
+
+      cat("  - `auto_migration` : TRUE /FALSE. First submission = last one of previous phase.\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "auto_migration", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$auto_migration <- readline(prompt = "Auto migration (format : TRUE / FALSE) [default : FALSE] : ")
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$auto_migration <- as.logical(x = configurationYaml$phases[[ phase_idx_c ]]$auto_migration)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$auto_migration) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$auto_migration <- FALSE
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$auto_migration)
+
+      cat("  - `starting_kit` : Zip file. Sample code downloadable by participants (in Files page).\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "starting_kit", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$starting_kit <- readline(prompt = "Starting kit (format : filename with .zip extension, if 'no' the entry is removed from the configuration) [default : starting_kit.zip] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$starting_kit == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$starting_kit <- "starting_kit.zip"
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$starting_kit == "no" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$starting_kit <- NULL
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$starting_kit)
+
+      cat("  - `public_data` : Zip file. Data downloadable by participants (in Files page).\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "public_data", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$public_data <- readline(prompt = "Public data (format : filename with .zip extension, if 'no' the entry is removed from the configuration) [default : public_data.zip] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$public_data == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$public_data <- "public_data.zip"
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$public_data == "no" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$public_data <- NULL
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$public_data)
+
+      cat("  - `input_data` : Zip file. Data fed to submission. No need if is_scoring_only == TRUE\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "input_data", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- readline(prompt = "Input data (format : filename with .zip extension (e.g. 'input_data.zip'), if 'no' the entry is removed from the configuration) [default : no] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$input_data == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- "no"
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$input_data == "no" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- NULL
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$input_data)
+
+      cat("  - `reference_data` :\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "reference_data", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$reference_data <- readline(prompt = "Reference data (format : filename with .zip extension) [default : reference_data.zip] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$reference_data == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$reference_data <- "reference_data.zip"
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$reference_data)
+
+      cat("  - `ingestion_program` :\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "ingestion_program", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- readline(prompt = "Ingestion program (format : filename with .zip extension (e.g. ingestion_program.zip), if 'no' the entry is removed from the configuration) [default : no] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$ingestion_program == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- "no"
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$ingestion_program == "no" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- NULL
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$ingestion_program)
+
+      cat("  - `scoring_program` :\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "scoring_program", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$scoring_program <- readline(prompt = "Scoring program (format : filename with .zip extension) [default : scoring_program.zip] : ")
+      }
+      if ( configurationYaml$phases[[ phase_idx_c ]]$scoring_program == "" ) {
+          configurationYaml$phases[[ phase_idx_c ]]$scoring_program <- "scoring_program.zip"
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$scoring_program)
+
+      cat("  - `external datasets` :\n")
+      datasetsNumber <- configuration[[ paste("phases", phase_idx, "external_datasets_number", sep = "_" ) ]]
+      if ( is.null(x = datasetsNumber ) ) {
+          datasetsNumber <- readline(prompt = "Number of external datasets to add (format : integer) [default : 0] : ")
+      }
+      datasetsNumber <- as.integer(x = datasetsNumber)
+      if ( is.na(x = datasetsNumber) ) {
+          datasetsNumber <- 0
+      }
+      configuration[[ paste("phases", phase_idx, "external_datasets_number", sep = "_" ) ]] <- datasetsNumber
+      if ( datasetsNumber > 0 ) {
+          configurationYaml$phases[[ phase_idx_c ]]$datasets <- NULL
+          for ( dataSetsIdx in seq_len(length.out = datasetsNumber) ) {
+              dataSetsIdx_c <- as.character(x = dataSetsIdx)
+              
+              datasetsName  <- configuration[[ paste("phases", phase_idx, "external_datasets_number", dataSetsIdx, "name", sep = "_" ) ]]
+              if ( is.null(x = datasetsName) ) {
+                  datasetsName <- readline(prompt = paste("External dataset ", dataSetsIdx, " : name, should be unique ! (format : string) [default : Dataset ", dataSetsIdx, "] : ", sep = "") )
+              }
+              if ( datasetsName == "" ) {
+                  datasetsName <- paste("Dataset ", dataSetsIdx, sep = "")
+              }
+              configuration[[ paste("phases", phase_idx, "external_datasets_number", dataSetsIdx, "name", sep = "_" ) ]] <- datasetsName
+              
+              datasetsUrl  <- configuration[[ paste("phases", phase_idx, "external_datasets_number", dataSetsIdx, "url", sep = "_" ) ]]
+              if ( is.null(x = datasetsUrl) ) {
+                  datasetsUrl <- readline(prompt = paste("External dataset ", dataSetsIdx, " : url (format : string) [default : https://vincentarelbundock.github.io/Rdatasets/] : ", sep = "") )
+              }
+              configuration[[ paste("phases", phase_idx, "external_datasets_number", dataSetsIdx, "url", sep = "_" ) ]] <- datasetsUrl
+
+              datasetsDescription  <- configuration[[ paste("phases", phase_idx, "external_datasets_number", dataSetsIdx, "description", sep = "_" ) ]]
+              if ( is.null(x = datasetsDescription) ) {
+                  datasetsDescription <- readline(prompt = paste("External dataset ", dataSetsIdx, " : description (format : string) [default : TEMPLATE : description dataset ", dataSetsIdx, "] : ", sep = "") )
+              }
+              if ( datasetsDescription == "" ) {
+                  datasetsDescription <- paste("TEMPLATE : description dataset ", dataSetsIdx, sep = "")
+              }
+              configuration[[ paste("phases", phase_idx, "external_datasets_number", dataSetsIdx, "description", sep = "_" ) ]] <- datasetsDescription
+
+              configurationYaml$phases[[ phase_idx_c ]]$datasets[[ dataSetsIdx_c ]] <- NULL
+              configurationYaml$phases[[ phase_idx_c ]]$datasets[[ dataSetsIdx_c ]]$name        <- datasetsName
+              configurationYaml$phases[[ phase_idx_c ]]$datasets[[ dataSetsIdx_c ]]$url         <- datasetsUrl
+              configurationYaml$phases[[ phase_idx_c ]]$datasets[[ dataSetsIdx_c ]]$description <- datasetsDescription
+              remove(list = c("dataSetsIdx_c", "datasetsName", "datasetsUrl", "datasetsDescription") )
+          }
+          remove(list = "dataSetsIdx")
+      }
+      remove(list = "datasetsNumber")
+            
+      cat("  - `phase_never_ends` : TRUE /FALSE. If checked, the phase does not end at the beginning of the next one.\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "phase_never_ends", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$phase_never_ends <- readline(prompt = "Phase never ends (format : TRUE / FALSE) [default : FALSE] : ")
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$phase_never_ends <- as.logical(x = configurationYaml$phases[[ phase_idx_c ]]$phase_never_ends)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$phase_never_ends) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$phase_never_ends <- FALSE
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$phase_never_ends)
+      
+      cat("  - `force_best_submission_to_leaderboard` : TRUE /FALSE. If TRUE, if submission beats old score, put submission on leaderboard\n")
+      if ( is.null(x = configuration[[ paste("phases", phase_idx, "force_best_submission_to_leaderboard", sep = "_" ) ]] ) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- readline(prompt = "Force best submission to leaderboard (format : TRUE / FALSE) [default : TRUE] : ")
+      }
+      configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- as.logical(x = configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard)
+      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard) ) {
+          configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- TRUE
+      }
+      print(x = configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard)
+      
+      print(x = "")
+      
+      remove(list = "phase_idx_c")
+  }
+  ```
+
+### 4. Some phase properties cannot be specified in the YAML file. However, they are available from the editor:
+
+- `Leaderboard Mode` : The mode "Hide Results" makes the leaderboard results invisible to non organizers (makes the leaderboard "private"). Useful when the organizers want to review results in the final phase before revealing them publicly.
+
+### 5. Leaderboard properties using the YAML file
+
+- `leaderboard` :
+  ```{r README - Leaderboard, echo = FALSE}
+  configurationYaml$leaderboard <- NULL
+  configurationYaml$leaderboard$leaderboards <- NULL
+  configurationYaml$leaderboard$leaderboards$Results <- NULL
+  configurationYaml$leaderboard$leaderboards$Results$label <- "Results"
+  configurationYaml$leaderboard$leaderboards$Results$rank  <- as.integer(x = 1)
+
+  configurationYaml$leaderboard$columns <- NULL
+
+  if ( is.null(x = configuration$score_number) ) {
+      configuration$score_number <- readline(prompt = "Score number (format : integer) [default = 1] : ")
+  }
+  configuration$score_number <- as.integer(x = configuration$score_number)
+  if ( is.na(x = configuration$score_number) ) {
+      configuration$score_number <- 1
+  }
+  print(x = paste("Score number : ", configuration$score_number, sep = "") )
+
+  temp <- readline(prompt = "The first score will be used to define the leaderboard rank.\nPress 'ENTER' when you are ready to define your scores.")
+  remove(list = "temp")
+  
+  for ( score_idx in seq_len(length.out = configuration$score_number ) ) {
+      score_idx_c <- as.character(x = score_idx)
+      score_name  <- ""
+      
+      cat("  - `score ", score_idx, " : name` : string. It shoudl correspond to the name provided inside the results file by the participants.\n")
+      if ( is.null(x = configuration[[ paste("scores", score_idx, "name", sep = "_" ) ]] ) ) {
+          score_name <- readline(prompt = paste("Score ", score_idx, " : name (format : string) [default = score_", score_idx, "] : ", sep = "") )
+      }
+      if ( score_name == "" ) {
+          score_name <- paste("score_", score_idx, sep = "")
+      }
+      print(x = score_name)
+      
+      cat("  - `score ", score_idx, " : label` : string. The associated column will be named with this label in the leaderboard.\n")
+      if ( is.null(x = configuration[[ paste("scores", score_idx, "label", sep = "_" ) ]] ) ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$label <- readline(prompt = paste("Score ", score_idx, " : label (format : string) [default = Score ", score_idx, "] : ", sep = "") )
+      }
+      if ( configurationYaml$leaderboard$columns[[ score_name ]]$label == "" ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$label <- paste("Score ", score_idx, sep = "")
+      }
+      print(x = configurationYaml$leaderboard$columns[[ score_name ]]$label)
+
+      cat("  - `score ", score_idx, " : rank` : integer. It indicates the index of the associated column in the leaderboard.\n")
+      if ( is.null(x = configuration[[ paste("scores", score_idx, "rank", sep = "_" ) ]] ) ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$rank <- readline(prompt = paste("Score ", score_idx, " : rank (format : integer) [default = ", score_idx, "] : ", sep = "") )
+      }
+      configurationYaml$leaderboard$columns[[ score_name ]]$rank <- as.integer(x = configurationYaml$leaderboard$columns[[ score_name ]]$rank)
+      if ( is.na(x = configurationYaml$leaderboard$columns[[ score_name ]]$rank) ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$rank <- as.integer(x = score_idx)
+      }
+      print(x = configurationYaml$leaderboard$columns[[ score_name ]]$rank)
+      
+      cat("  - `score ", score_idx, " : numeric_format` : integer. Number of decimals to display.\n")
+      if ( is.null(x = configuration[[ paste("scores", score_idx, "numeric_format", sep = "_" ) ]] ) ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$numeric_format <- readline(prompt = paste("Score ", score_idx, " : numeric_format (format : integer) [default = 4] : ", sep = "") )
+      }
+      configurationYaml$leaderboard$columns[[ score_name ]]$numeric_format <- as.integer(x = configurationYaml$leaderboard$columns[[ score_name ]]$numeric_format)
+      if ( is.na(x = configurationYaml$leaderboard$columns[[ score_name ]]$numeric_format) ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$numeric_format <- as.integer(x = 4)
+      }
+      print(x = configurationYaml$leaderboard$columns[[ score_name ]]$numeric_format)
+      
+      cat("  - `score ", score_idx, " : sort` : asc / desc. The scores can be sorted in ascending ('asc') or descending ('desc') order.\n")
+      if ( is.null(x = configuration[[ paste("scores", score_idx, "sort", sep = "_" ) ]] ) ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$sort <- readline(prompt = paste("Score ", score_idx, " : sort (format : asc / desc) [default = asc] : ", sep = "") )
+      }
+      if ( !{configurationYaml$leaderboard$columns[[ score_name ]]$sort %in% c("asc", "desc") } ) {
+          configurationYaml$leaderboard$columns[[ score_name ]]$sort <- "asc"
+      }
+      print(x = configurationYaml$leaderboard$columns[[ score_name ]]$sort)
+
+      configurationYaml$leaderboard$columns[[ score_name ]]$leaderboard <- configurationYaml$leaderboard$leaderboards$Results
+
+      print(x = "")
+      
+      remove(list = c("score_idx", "score_idx_c", "score_name") )
+  }
+  
+  cat("  - `average score : use` : TRUE / FALSE. We can display the average of all the scores.\n")
+  if ( is.null(x = configuration$average_score_use) ) {
+      configuration$average_score_use <- readline(prompt = paste("Average score : use (format : TRUE / FALSE) [default = FALSE] : ", sep = "") )
+  }
+  configuration$average_score_use <- as.logical(x = configuration$average_score_use)
+  if ( is.na(x = configuration$average_score_use) ) {
+      configuration$average_score_use <- FALSE
+  }
+  print(x = configuration$average_score_use)
+
+  if ( configuration$average_score_use ) {
+      cat("  - `average score : label` : string. The associated column will be named with this label in the leaderboard.\n")
+      if ( is.null(x = configuration$ave_score_label) ) {
+          configurationYaml$leaderboard$columns$ave_score$label <- readline(prompt = "average score : label (format : string) [default = Average score] : ")
+      }
+      if ( configurationYaml$leaderboard$columns$ave_score$label == "" ) {
+          configurationYaml$leaderboard$columns$ave_score$label <- "Average score"
+      }
+      print(x = configurationYaml$leaderboard$columns$ave_score$label)
+
+      cat("  - `average score : rank` : integer. It indicates the index of the associated column in the leaderboard.\n")
+      if ( is.null(x = configuration$ave_score_rank) ) {
+          configurationYaml$leaderboard$columns$ave_score$rank <- readline(prompt = paste("average score : rank (format : integer) [default = ", configuration$score_number + 1, "] : ", sep = "") )
+      }
+      configurationYaml$leaderboard$columns$ave_score$rank <- as.integer(x = configurationYaml$leaderboard$columns$ave_score$rank)
+      if ( is.na(x = configurationYaml$leaderboard$columns$ave_score$rank) ) {
+          configurationYaml$leaderboard$columns$ave_score$rank <- configuration$score_number + 1
+      }
+      print(x = configurationYaml$leaderboard$columns$ave_score$rank)
+      
+      cat("  - `average score : sort` : asc / desc. The scores can be sorted in ascending or descending order.\n")
+      if ( is.null(x = configuration$ave_score_sort) ) {
+          configurationYaml$leaderboard$columns$ave_score$sort <- readline(prompt = paste("average score : sort (format : asc / desc) [default = asc] : ", sep = "") )
+      }
+      if ( !{configurationYaml$leaderboard$columns$ave_score$sort %in% c("asc", "desc") } ) {
+          configurationYaml$leaderboard$columns$ave_score$sort <- "asc"
+      }
+      print(x = configurationYaml$leaderboard$columns$ave_score$sort)
+      
+      cat("  - `average score : numeric_format` : integer. Number of decimals to display.\n")
+      if ( is.null(x = configuration$ave_score_numeric_format) ) {
+          configurationYaml$leaderboard$columns$ave_score$numeric_format <- readline(prompt = paste("average score : numeric_format (format : integer) [default = 4] : ", sep = "") )
+      }
+      configurationYaml$leaderboard$columns$ave_score$numeric_format <- as.integer(x = configurationYaml$leaderboard$columns$ave_score$numeric_format)
+      if ( is.na(x = configurationYaml$leaderboard$columns$ave_score$numeric_format) ) {
+          configurationYaml$leaderboard$columns$ave_score$numeric_format <- 4
+      }
+      print(x = configurationYaml$leaderboard$columns$ave_score$numeric_format)
+      
+      configurationYaml$leaderboard$columns$ave_score$leaderboard <- configurationYaml$leaderboard$leaderboards$Results
+
+      configurationYaml$leaderboard$columns$ave_score$computed <- NULL
+      
+      cat("  - `average score : operation` : string. Name of the function to aplly.\n")
+      configurationYaml$leaderboard$columns$ave_score$computed$operation <- "Avg"
+      print(x = configurationYaml$leaderboard$columns$ave_score$computed$operation)
+
+      cat("  - `average score : fields` : string. Name of the function to aplly.\n")
+      configurationYaml$leaderboard$columns$ave_score$computed$fields <- paste( names(x = configurationYaml$leaderboard$columns)[ seq_len(length.out = configuration$score_number) ], collapse = ", ")
+      print(x = configurationYaml$leaderboard$columns$ave_score$computed$fields)
+  }
+  ```
+
+### 6. Leaderboard features accessible only using the online editor
+    - `Show rank` : show the rank of the participants or not. It seems that the associated field ('show_rank') in the YAML file is not recognized, and we have to use the online editor to change this option [issue#2118](https://github.com/codalab/codalab-competitions/issues/2118).
+
+### 7. Extra features
+
+   - `Audit trail` : [Competition history](https://github.com/codalab/codalab-competitions/wiki/User_Tracking-Competition-History) creates an audit trail which enables participants and organizers to see the percentage of correct answers for each successive submission. For a given competition, participants can view the history for their own submissions, while organizers can see the history for all submissions. In order to enable history, the scoring program must be modified.
+   
+### 8. Deprecated features
+
+- `Enable medical image viewer` : no longer in use in v1.5. It was only for medical competitions.
+
+## IV. Generation of the Yaml configuration file
+
+```{r README - Generation Yaml file, include = FALSE, cache = FALSE}
+yaml::write_yaml(
+          x            = configurationYaml
+        , file         = paste(configuration$name, .Platform$file.sep, "competition.yaml", sep = "")
+        , fileEncoding = "UTF-8"
+      )
+```
+
+## V. Generation of the dataset
+
+```{r README - Generation datasets, include = FALSE}
+generateData <- readline(prompt = paste("Generation of : ", configurationYaml$html$data, " : should we simulate the data and the associated rds files ? (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
+generateData <- as.logical(x = generateData)
+if ( is.na(x = generateData) ) {
+    generateData <- TRUE
+}
+if ( generateData ) {
+    rmarkdown::render(input = "generate_data.Rmd")
+} else {
+    message <- readline(prompt = "Please, generate all the data sets that are required, and then press 'ENTER'.")
+    remove(list = "message")
+}
+remove(list = "generateData")
+```
+
+## VI. Generation of the scoring program (and optionally of the ingestion program)
+
+    - scoring_program/metada : the CodaLab commands to launch the scoring file
+    - two available languages : R, Python (EDIT in accordance with the section *competition_docker_image* inside the file competition_head.yaml)
+    - scoring_program/scoring.R or socring_program/scoring.py
+      - be careful to update the leader board !
+
+```{r README - Generation scoring or ingestion programs, include = FALSE}
+message <- readline(prompt = "Please, generate all the scoring programs and optionnaly the ingestion programs that are required, and then press 'ENTER'.")
+remove(list = "message")
+```
+
+## VII. Generation of the html files
+
+### 1. Overview
+
+The file `r configurationYaml$html$overview` is required for the tab 'Overview'.
+```{r README - Generation html overview, include = FALSE}
+useRmd <- readline(prompt = paste("Generation of : ", configurationYaml$html$overview, " : use of the associated Rmd file (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
+useRmd <- as.logical(x = useRmd)
+message <- NA
+if ( is.na(x = useRmd) ) {
+    useRmd <- TRUE
+}
+if ( useRmd ) {
+    rmarkdown::render(
+                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$overview)
+                 , output_dir = configuration$name
+                 , quiet = TRUE
+               )
+} else {
+    message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$overview, "' associated to the tab 'Overview'. Then press 'ENTER'.", sep = "") )
+    file.copy(
+        from = configurationYaml$html$overview
+      , to = paste(configuration$name, .Platform$file.sep, configurationYaml$html$overview, sep = "")
+      , overwrite = TRUE
+    )
+}
+
+remove(list = c("useRmd", "message") )
+```
+  
+### 2. Evaluation
+
+The file `r configurationYaml$html$evaluation` is required for the tab Evaluation'.
+```{r README - Generation html evaluation, include = FALSE}
+useRmd <- readline(prompt = paste("Generation of : ", configurationYaml$html$evaluation, " : use of the associated Rmd file (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
+useRmd <- as.logical(x = useRmd)
+message <- NA
+if ( is.na(x = useRmd) ) {
+    useRmd <- TRUE
+}
+if ( useRmd ) {
+    rmarkdown::render(
+                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$evaluation)
+                 , output_dir = configuration$name
+                 , quiet = TRUE
+               )
+} else {
+    message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$evaluation, "' associated to the tab 'Evaluation'. Then press 'ENTER'.", sep = "") )
+    file.copy(
+        from = configurationYaml$html$evaluation
+      , to = paste(configuration$name, .Platform$file.sep, configurationYaml$html$evaluation, sep = "")
+      , overwrite = TRUE
+    )
+}
+remove(list = c("useRmd", "message") )
+```
+   
+### 3. Terms and Conditions
+
+The file `r configurationYaml$html$terms` is required for the tab 'Terms and Conditions'.
+```{r README - Generation html terms, include = FALSE}
+useRmd <- readline(prompt = paste("Generation of : ", configurationYaml$html$terms, " : use of the associated Rmd file (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
+useRmd <- as.logical(x = useRmd)
+message <- NA
+if ( is.na(x = useRmd) ) {
+    useRmd <- TRUE
+}
+if ( useRmd ) {
+    rmarkdown::render(
+                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$terms)
+                 , output_dir = configuration$name
+                 , quiet = TRUE
+               )
+} else {
+    message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$terms, "' associated to the tab 'Terms and Condition'. Then press 'ENTER'.", sep = "") )
+    file.copy(
+        from = configurationYaml$html$terms
+      , to = paste(configuration$name, .Platform$file.sep, configurationYaml$html$terms, sep = "")
+      , overwrite = TRUE
+    )
+}
+remove(list = c("useRmd", "message") )
+```
+   
+### 4. Data
+
+The file `r configurationYaml$html$data` is required for the tab 'Data'.
+```{r README - Generation html data, include = FALSE}
+useRmd <- readline(prompt = paste("Generation of : ", configurationYaml$html$data, " : use of the associated Rmd file (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
+useRmd <- as.logical(x = useRmd)
+message <- NA
+if ( is.na(x = useRmd) ) {
+    useRmd <- TRUE
+}
+if ( useRmd ) {
+    rmarkdown::render(
+                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$data)
+                 , output_dir = configuration$name
+                 , quiet = TRUE
+               )
+} else {
+    message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$data, "' associated to the tab 'Data'. Then press 'ENTER'.", sep = "") )
+    file.copy(
+        from = configurationYaml$html$data
+      , to = paste(configuration$name, .Platform$file.sep, configurationYaml$html$data, sep = "")
+      , overwrite = TRUE
+    )
+}
+remove(list = c("useRmd", "message") )
+```
+   
+### 5. Additional html pages
+
+```{r README - Generation additional html pages, echo = FALSE}
+for ( additional_page_idx in seq_len(length.out = configuration$html_additional_page_number ) ) {
+    html_additional_page_idx_name  <- configuration[[ html_additional_page_idx_name ]]
+    html_additional_page_idx_path  <- configuration[[ html_additional_page_idx_path ]]
+    
+    cat( paste("  - The file '", html_additional_page_idx_path, "` is required for the tab '", html_additional_page_idx_name, "'.", sep = "") )
+    useRmd <- readline(prompt = paste("Generation of : ", html_additional_page_idx_path, " : use of the associated Rmd file (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
+    useRmd <- as.logical(x = useRmd)
+    message <- NA
+    if ( is.na(x = useRmd) ) {
+        useRmd <- TRUE
+    }
+    if ( useRmd ) {
+        rmarkdown::render(
+                       input = sub(pattern = ".html", replacement = ".Rmd", x = html_additional_page_idx_path)
+                 , output_dir = configuration$name
+                 , quiet = TRUE
+               )
+    } else {
+        message <- readline(prompt = paste("Please, generate in the current directory the file '", html_additional_page_idx_path, "' associated to the tab 'Data'. Then press 'ENTER'.", sep = "") )
+        file.copy(
+            from = html_additional_page_idx_path
+          , to = paste(configuration$name, .Platform$file.sep, html_additional_page_idx_path, sep = "")
+          , overwrite = TRUE
+        )
+    }
+    remove(list = c("html_additional_page_idx_name", "html_additional_page_idx_path", "useRmd", "message") )
+}
+remove(list = "additional_page_idx")
+```
+
+
+## VIII. Generation of the phases
+
+```{r README - Generation phases, echo = FALSE}
+for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
+    phase_idx_c <- as.character(x = phase_idx)
+    cat( paste("Phase ", phase_idx, " :\n", sep = "") )
+    
+    if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$public_data) ) {
+        cat("  - `public data` :\n")
+        zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$public_data, sep = "")
+        useFile <- FALSE
+        if ( file.exists( zipName ) ) {
+            useFile <- readline(prompt = paste("Phase ", phase_idx, " : public data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+            useFile <- as.logical(x = useFile)
+            if ( is.na(x = useFile) ) {
+                useFile <- FALSE
+            }
+        }
+        if ( !useFile ) {
+            files <- readline(prompt = paste("Phase ", phase_idx, " : public data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$public_data, "' (format : comma separated filenames) [default : data.rds] : ", sep = "") )
+            if ( files == "" ) {
+                files <- "data.rds"
+            }
+            files <- unlist(x = strsplit(x = files, split = ",") )
+            zip(
+                zipfile = zipName
+              , files   = files
+            )
+            remove(list = "files")
+        }
+        for ( file in unzip(zipName, list = TRUE)$Name ) {
+            cat( paste("  |-> ", file, "\n", sep = "") )
+        }
+        remove(list = c("zipName", "useFile", "file") )
+    }
+    
+    if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$input_data) ) {
+        cat("  - `input data` :\n")
+        zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$input_data, sep = "")
+        useFile <- FALSE
+        if ( file.exists( zipName ) ) {
+            useFile <- readline(prompt = paste("Phase ", phase_idx, " : input data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+            useFile <- as.logical(x = useFile)
+            if ( is.na(x = useFile) ) {
+                useFile <- FALSE
+            }
+        }
+        if ( !useFile ) {
+            files <- readline(prompt = paste("Phase ", phase_idx, " : input data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$input_data, "' (format : comma separated filenames) [default : data_input.rds] : ", sep = "") )
+            if ( files == "" ) {
+                files <- "data_input.rds"
+            }
+            files <- unlist(x = strsplit(x = files, split = ",") )
+            zip(
+                zipfile = zipName
+              , files   = files
+            )
+            remove(list = "files")
+        }
+        for ( file in unzip(zipName, list = TRUE)$Name ) {
+            cat( paste("  |-> ", file, "\n", sep = "") )
+        }
+        remove(list = c("zipName", "useFile", "file") )
+    }
+    
+    cat("  - `reference data` :\n")
+    zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$reference_data, sep = "")
+    useFile <- FALSE
+    if ( file.exists( zipName ) ) {
+        useFile <- readline(prompt = paste("Phase ", phase_idx, " : reference data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+        useFile <- as.logical(x = useFile)
+        if ( is.na(x = useFile) ) {
+            useFile <- FALSE
+        }
+    }
+    if ( !useFile ) {
+        files <- readline(prompt = paste("Phase ", phase_idx, " : reference data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$reference_data, "' (format : comma separated filenames) [default : data_reference.rds] : ", sep = "") )
+            if ( files == "" ) {
+                files <- "data_reference.rds"
+            }
+        files <- unlist(x = strsplit(x = files, split = ",") )
+        zip(
+            zipfile = zipName
+          , files   = files
+        )
+        remove(list = "files")
+    }
+    for ( file in unzip(zipName, list = TRUE)$Name ) {
+        cat( paste("  |-> ", file, "\n", sep = "") )
+    }
+    remove(list = c("zipName", "useFile", "file") )
+    
+    if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$starting_kit) ) {
+        cat("  - `starting kit` :\n")
+        zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$starting_kit, sep = "")
+        useFile <- FALSE
+        if ( file.exists( zipName ) ) {
+            useFile <- readline(prompt = paste("Phase ", phase_idx, " : starting kit : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+            useFile <- as.logical(x = useFile)
+            if ( is.na(x = useFile) ) {
+                useFile <- FALSE
+            }
+        }
+        if ( !useFile ) {
+            filesTemp <- sapply(
+                X = c(unlist(x = configurationYaml$html), "starting_kit.Rmd", "generate_result.Rmd")
+              , FUN = function(x) {
+                  rmd <- sub(pattern = ".html", replacement = ".Rmd", x = x)
+                  if ( file.exists( rmd ) ) {
+                      rmd
+                  } else {
+                      x
+                  }
+              }
+            )
+            if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$public_data) ) {
+                filesTemp <- c(filesTemp, paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$public_data, sep = "") )
+            }
+            filesTemp <- unique(x = filesTemp)
+            files <- readline(prompt = paste("Phase ", phase_idx, " : starting kit : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$starting_kit, "' (format : comma separated filenames) [default : ", paste(filesTemp, collapse = ","), "] : ", sep = "") )
+            if ( files == "" ) {
+                files <- filesTemp
+            } else {
+                files <- unlist(x = strsplit(x = files, split = ",") )
+            }
+            zip(
+                zipfile = zipName
+              , files   = files
+            )
+            remove(list = c("filesTemp", "files") )
+        }
+        for ( file in unzip(zipName, list = TRUE)$Name ) {
+            cat( paste("  |-> ", file, "\n", sep = "") )
+        }
+    }
+    remove(list = c("zipName", "useFile", "file") )
+    
+    if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$ingestion_program) ) {
+        cat("  - `ingestion program` :\n")
+        zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$ingestion_program, sep = "")
+        useFile <- FALSE
+        if ( file.exists( zipName ) ) {
+            useFile <- readline(prompt = paste("Phase ", phase_idx, " : ingestion program : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+            useFile <- as.logical(x = useFile)
+            if ( is.na(x = useFile) ) {
+                useFile <- FALSE
+            }
+        }
+        if ( !useFile ) {
+            files <- readline(prompt = paste("Phase ", phase_idx, " : ingestion program : directory inside which we have the files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$ingestion_program, "' (format : directory name) [default : ingestion_program] : ", sep = "") )
+            if ( files == "" ) {
+                files <- "ingestion_program"
+            }
+            zip(
+                zipfile = zipName
+              , files   = list.files(path = files, full.names = TRUE)
+              , flags   = "-r9Xj"
+            )
+            remove(list = "files")
+        }
+        for ( file in unzip(zipName, list = TRUE)$Name ) {
+            cat( paste("  |-> ", file, "\n", sep = "") )
+        }
+        remove(list = c("zipName", "useFile", "file") )
+    }
+    
+    cat("  - `scoring program` :\n")
+    zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$scoring_program, sep = "")
+    useFile <- FALSE
+    if ( file.exists( zipName ) ) {
+        useFile <- readline(prompt = paste("Phase ", phase_idx, " : scoring program : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+        useFile <- as.logical(x = useFile)
+        if ( is.na(x = useFile) ) {
+            useFile <- FALSE
+        }
+    }
+    if ( !useFile ) {
+        files <- readline(prompt = paste("Phase ", phase_idx, " : scoring program : directory inside which we have the files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$scoring_program, "' (format : directory name) [default : scoring_program] : ", sep = "") )
+        if ( files == "" ) {
+            files <- "scoring_program"
+        }
+        zip(
+            zipfile = zipName
+          , files   = list.files(path = files, full.names = TRUE)
+          , flags   = "-r9Xj"
+        )
+        remove(list = "files")
+    }
+    for ( file in unzip(zipName, list = TRUE)$Name ) {
+        cat( paste("  |-> ", file, "\n", sep = "") )
+    }
+    remove(list = c("zipName", "useFile", "file") )
+}
+remove(list = "phase_idx")
+```
+
+## IX. Generation of the Codalab bundle
+    
+```{r README - Generation bundle, echo = FALSE, cache = FALSE}
+bundleFiles <- c(
+    configurationYaml$image
+  , unlist(x = configurationYaml$html)
+  , sapply(
+        X = configurationYaml$phases
+      , FUN = function( phase ) {
+          res <- NULL
+          if ( !is.null(x = phase$starting_kit) ) {
+              res <- c(res, phase$starting_kit)
+          }
+          if ( !is.null(x = phase$public_data) ) {
+              res <- c(res, phase$public_data)
+          }
+          if ( !is.null(x = phase$input_data) ) {
+              res <- c(res, phase$input_data)
+          }
+          if ( !is.null(x = phase$reference_data) ) {
+              res <- c(res, phase$reference_data)
+          }
+          if ( !is.null(x = phase$ingestion_program) ) {
+              res <- c(res, phase$ingestion_program)
+          }
+          if ( !is.null(x = phase$scoring_program) ) {
+              res <- c(res, phase$scoring_program)
+          }
+          res
+      }
+    )
+)
+bundleFiles <- unique(x = bundleFiles)
+bundlePath  <- paste(configuration$name, .Platform$file.sep, "bundle.zip", sep = "")
+
+zip(
+    zipfile = bundlePath
+  , files   = paste(configuration$name, .Platform$file.sep, bundleFiles, sep = "")
+)
+
+for ( file in unzip(bundlePath, list = TRUE)$Name ) {
+    cat( paste("  |-> ", file, "\n", sep = "") )
+}
+remove(list = c("bundleFiles", "bundlePath", "file") )
+
+save(
+    list = c("configuration", "configurationYaml")
+  , file = "save.RData"
+)
+```
+
+## X. Rendering of a web site to previsualize the competition
+
+It gives you the possibility to visualize your competition with a minimalist website which looks like the Codalab platform.
+`rmarkdown::render_site(input = "README.Rmd")`
+
+
+# Session Information
+
+```{r README - Session information, results="verbatim"}
+     print(x = sessionInfo(), RNG = TRUE, locale = TRUE)
+```
