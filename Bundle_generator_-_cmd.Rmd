@@ -9,9 +9,6 @@ params:
 ```{r README - Knitr configuration, child = "Common_knitr_configuration.Rmd", include = FALSE}
 ```
 
-# TODO
-- If you use R on Windows, you have to use the function "zip::zip" instead of the function "zip" to create a zip archive.
-
 # Template for CodaLab competition bundles
 
 ## I. Package dependencies
@@ -185,7 +182,7 @@ if ( is.na(x = configurationYaml$enable_detailed_results) ) {
 print(x = configurationYaml$enable_detailed_results)
 ```
 
-- `admin_names` :  Comma separated list of Codalab IDs of co-organizers It is called admins in the editor.
+- `admin_names` :  Comma separated list of Codalab IDs of co-organizers It is called admins in the editor. It seems, that the option in the YAML file is not working, please use the online editor.[TODO : update the documentation]
 ```{r README - Admin names, echo = FALSE}
 if ( is.null(x = configuration$admin_names) ) {
     configurationYaml$admin_names <- readline(prompt = paste("Admin names (format : comma separated list) [default = ", Sys.info( )[ "user" ], "] : ", sep = "") )
@@ -923,7 +920,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
                 files <- "data.rds"
             }
             files <- unlist(x = strsplit(x = files, split = ",") )
-            zip(
+            zip::zipr(
                 zipfile = zipName
               , files   = files
             )
@@ -952,7 +949,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
                 files <- "data_input.rds"
             }
             files <- unlist(x = strsplit(x = files, split = ",") )
-            zip(
+            zip::zipr(
                 zipfile = zipName
               , files   = files
             )
@@ -980,7 +977,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
                 files <- "data_reference.rds"
             }
         files <- unlist(x = strsplit(x = files, split = ",") )
-        zip(
+        zip::zipr(
             zipfile = zipName
           , files   = files
         )
@@ -1024,7 +1021,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
             } else {
                 files <- unlist(x = strsplit(x = files, split = ",") )
             }
-            zip(
+            zip::zipr(
                 zipfile = zipName
               , files   = files
             )
@@ -1052,7 +1049,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
             if ( files == "" ) {
                 files <- "ingestion_program"
             }
-            zip(
+            zip::zipr(
                 zipfile = zipName
               , files   = list.files(path = files, full.names = TRUE)
               , flags   = "-r9Xj"
@@ -1080,7 +1077,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
         if ( files == "" ) {
             files <- "scoring_program"
         }
-        zip(
+        zip::zipr(
             zipfile = zipName
           , files   = list.files(path = files, full.names = TRUE)
           , flags   = "-r9Xj"
@@ -1130,7 +1127,7 @@ bundleFiles <- c(
 bundleFiles <- unique(x = bundleFiles)
 bundlePath  <- paste(configuration$name, .Platform$file.sep, "bundle.zip", sep = "")
 
-zip(
+zip::zipr(
     zipfile = bundlePath
   , files   = paste(configuration$name, .Platform$file.sep, bundleFiles, sep = "")
 )
