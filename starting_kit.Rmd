@@ -1,0 +1,33 @@
+---
+title: "Starting kit"
+date: "`r Sys.Date( )`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: false
+---
+
+```{r label = "Starting kit - header", include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = TRUE, echo = FALSE, results = "hide")
+```
+
+# Overview
+
+```{r label = "Starting kit - overview", child = 'overview.Rmd'}
+```
+
+```{r label = "Starting kit - data", child = 'data.Rmd'}
+```
+
+```{r label = "Starting kit - evaluation", child = 'evaluation.Rmd'}
+```
+
+```{r label = "Starting kit - terms", child = 'terms.Rmd'}
+```
+
+# Submission (example)
+
+```{r label = "Starting kit - submission", child = 'submission_script.Rmd'}
+```

@@ -1,0 +1,82 @@
+---
+title: "Generation of a multivariate Gaussian data set"
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+params:
+  package_repository: "https://cloud.r-project.org"
+  install_dependencies: true
+  seed: 1
+---
+
+# Package dependencies
+
+- MASS : to simulate a multivariate Gaussian data set.
+
+```{r label = "Generate data - dependencies", include = FALSE}
+if ( params$install_dependencies ) {
+    installed_packages <- installed.packages( )
+    for (package in c("MASS") ) {
+        if ( !{ package %in% installed_packages } ) {
+            print(x = paste("Installation of ", package, sep = "") )
+            install.packages(
+                pkgs = package
+              , repos = params$package_repository
+            )
+        } else {
+            print(x = paste(package, " is installed.", sep = "") )
+        }
+    }
+    remove(list = c("installed_packages", "package") )
+}
+```
+
+# Generation of a simulated data set
+
+## Set the random seed
+
+```{r label = "Generate data - Random seed", include = FALSE}
+set.seed(seed = as.integer(x = params$seed) )
+```
+
+## Generation
+
+```{r label = "Generate data - Generation", echo = FALSE}
+## Number of observations :
+N <- 1e3
+## Number of dimensions :
+M <- 5
+## Simulation parameters :
+simulation            <- vector(mode = "list", length = 2)
+names(x = simulation) <- c("mean", "Sigma")
+
+simulation$mean  <- runif(n = M, min = -M, max = M)
+simulation$Sigma <- diag(x = runif(n = M, min = 1e-6, max = M), nrow = M, ncol = M, names = FALSE)
+
+print(x = "Public data set")
+public_data <- MASS::mvrnorm(
+                         n     = N
+                       , mu    = simulation$mean
+                       , Sigma = simulation$Sigma
+                     )
+str(object = public_data)
+
+print(x = "Input data set")
+input_data <- MASS::mvrnorm(
+                         n     = N
+                       , mu    = simulation$mean
+                       , Sigma = simulation$Sigma
+                     )
+str(object = input_data)
+```
+
+## Save of the new data set
+
+```{r label = "Generate data - Save", include = FALSE}
+saveRDS(object = public_data, file = "public_data.rds"   )
+saveRDS(object = input_data , file = "input_data.rds"    )
+saveRDS(object = simulation , file = "reference_data.rds")
+```

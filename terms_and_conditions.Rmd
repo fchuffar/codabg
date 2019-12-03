@@ -1,0 +1,17 @@
+---
+title: Terms and Conditions
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+TEMPLATE : a description of the challenge rules, in particular if there will public submissions.
+
+* Our challenge is dedicated to learning and collaborating together. We want everyone to have an enjoyable and fulfilling experience. We are committed to providing a safe and comfortable environment and harassment-free experience for everyone.
+
+* We expect everyone here to behave accordingly. This means : not harassing others, respecting others’ opinions, respecting other’s abilities. We will not tolerate harassment of challenge participants in any form, this includes offenses related to gender, gender identity, age, sexual orientation, disability, physical appearance, ethnicity, religion, political view, level of experience.
+
+* Participants violating these rules may be asked to leave the challenge. Do not hesitate to get in touch with us in case you need help for resolving any issue.

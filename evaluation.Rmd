@@ -1,0 +1,11 @@
+---
+title: Evaluation
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+TEMPLATE : a description of the metrics used during each phase.

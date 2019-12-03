@@ -1,0 +1,12 @@
+*~
+\#*\#
+*cache/
+*_cache/
+test/
+*.csv
+*.html
+*.pdf
+*.rds
+*.RData
+*.Rhistory
+*.zip
