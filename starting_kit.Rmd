@@ -9,25 +9,21 @@ output:
     number_sections: false
 ---
 
-```{r label = "Starting kit - header", include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = TRUE, echo = FALSE, results = "hide")
-```
-
 # Overview
 
-```{r label = "Starting kit - overview", child = 'overview.Rmd'}
+```{r label = "Starting kit - overview", child = "overview.Rmd"}
 ```
 
-```{r label = "Starting kit - data", child = 'data.Rmd'}
+```{r label = "Starting kit - data", child = "data.Rmd"}
 ```
 
-```{r label = "Starting kit - evaluation", child = 'evaluation.Rmd'}
+```{r label = "Starting kit - evaluation", child = "evaluation.Rmd"}
 ```
 
-```{r label = "Starting kit - terms", child = 'terms.Rmd'}
+```{r label = "Starting kit - terms", child = "terms_and_conditions.Rmd"}
 ```
 
 # Submission (example)
 
-```{r label = "Starting kit - submission", child = 'submission_script.Rmd'}
+```{r label = "Starting kit - submission", child = "submission_script.Rmd"}
 ```

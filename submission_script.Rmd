@@ -15,6 +15,16 @@ params:
 - zip : to generate the zip files that contain the programs or the results to submit to the Codalab platform.
 
 ```{r label = "Submission - dependencies", include = FALSE}
+if ( !exists(x = "params") ) {
+    params                      <- NULL
+}
+if ( is.null(x = params$package_repository) ) {
+    params$package_repository   <- "https://cloud.r-project.org"
+}
+if ( is.null(x = params$install_dependencies) ) {
+    params$install_dependencies <- TRUE
+}
+print(params)
 if ( params$install_dependencies ) {
     installed_packages <- installed.packages( )
     for (package in c("zip") ) {
