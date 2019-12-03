@@ -198,25 +198,29 @@ if ( is.na(x = configurationYaml$has_registration) ) {
 print(x = configurationYaml$has_registration)
 ```
 
-- `start_date` : YYYY-MM-DD.
+- `start_date` : YYYY-mm-dd HH:MM:SS UTC.
 ```{r label = "GENERATOR - Start date"}
+tempTime <- as.POSIXct(x = Sys.time( ), tz = "GMT")
 if ( is.null(x = configuration$start_date) ) {
-    configurationYaml$start_date <- readline(prompt = paste("Start_Date (format : YYYY-MM-DD) [default = ", Sys.Date( ), "] : ", sep = "") )
+    configurationYaml$start_date <- readline(prompt = paste("Start_Date (format : YYYY-mm-dd HH:MM:SS UTC) [default = ", tempTime, "] : ", sep = "") )
 }
 if ( configurationYaml$start_date == "" ) {
-    configurationYaml$start_date <- as.character(x = Sys.Date( ) )
+    configurationYaml$start_date <- paste0(as.character(x = tempTime), "+00:00")
 }
+remove(list = "tempTime")
 print(x = configurationYaml$start_date)
 ```
 
-- `end_date` : YYYY-MM-DD. No end date if left blank
+- `end_date` : YYYY-mm-dd HH:MM:SS UTC. No end date if left blank
 ```{r label = "GENERATOR - End date"}
+tempTime <- as.POSIXct(x = Sys.time( ) + 3600 * 24 * 365, tz = "GMT")
 if ( is.null(x = configuration$end_date) ) {
-    configurationYaml$end_date <- readline(prompt = paste("End_Date (format : YYYY-MM-DD) [default = ", Sys.Date( ) + 365, "] : ", sep = "") )
+    configurationYaml$end_date <- readline(prompt = paste("End_Date (format : YYYY-mm-dd HH:MM:SS UTC) [default = ", tempTime, "] : ", sep = "") )
 }
 if ( configurationYaml$end_date == "" ) {
-    configurationYaml$end_date <- as.character(x = Sys.Date( ) + 365)
+    configurationYaml$end_date <- paste0(as.character(x = tempTime), "+00:00")
 }
+remove(list = "tempTime")
 print(x = configurationYaml$end_date)
 ```
 
@@ -394,13 +398,15 @@ print(x = configurationYaml$admin_names)
       }
       print(x = configurationYaml$phases[[ phase_idx_c ]]$description)
 
-      cat("  - `start_date` : YYYY-MM-DD, Phase start (ends when new phase begins)\n")
+      cat("  - `start_date` : YYYY-mm-dd HH:MM:SS UTC, Phase start (ends when new phase begins)\n")
+      tempTime <- as.POSIXct(x = Sys.time( ), tz = "GMT")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "start_date", sep = "_" ) ]] ) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$start_date <- readline(prompt = paste("Start date (format : YYYY-MM-DD) [default : ", Sys.Date( ), "] : ", sep = "") )
+          configurationYaml$phases[[ phase_idx_c ]]$start_date <- readline(prompt = paste("Start date (format : YYYY-mm-dd HH:MM:SS UTC) [default : ", tempTime, "] : ", sep = "") )
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$start_date == "" ) {
-          configurationYaml$phases[[ phase_idx_c ]]$start_date <- as.character(x = Sys.Date( ) )
+          configurationYaml$phases[[ phase_idx_c ]]$start_date <- paste0(as.character(x = tempTime), "+00:00")
       }
+      remove(list = "tempTime")
       print(x = configurationYaml$phases[[ phase_idx_c ]]$start_date)
 
       cat("  - `max_submissions` : positive integer. Maximum submissions per user.\n")
@@ -776,7 +782,7 @@ print(x = configurationYaml$admin_names)
 ```{r label = "GENERATOR - Generation Yaml file", include = FALSE, cache = FALSE}
 yaml::write_yaml(
           x            = configurationYaml
-        , file         = paste(configuration$name, .Platform$file.sep, "competition.yaml", sep = "")
+        , file         = paste0(configuration$name, .Platform$file.sep, "competition.yaml")
         , fileEncoding = "UTF-8"
       )
 ```
@@ -1154,7 +1160,8 @@ remove(list = "phase_idx")
     
 ```{r label = "GENERATOR - Generation bundle", cache = FALSE}
 bundleFiles <- c(
-    configurationYaml$image
+    "competition.yaml"
+  , configurationYaml$image
   , unlist(x = configurationYaml$html)
   , sapply(
         X = configurationYaml$phases
