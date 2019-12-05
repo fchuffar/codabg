@@ -110,26 +110,49 @@ program <- function(input) {
 # Generate a zip file with the 'program' source code
 
 ```{r label = "Submission - program zip file", echo = TRUE, results = "verbatim"}
+if ( !dir.exists(paths = "submissions") ) {
+    dir.create(path = "submissions")
+}
+
 ## we save the source code as a R file named 'program.R' :
-dump(list = c("program"), file = "program.R")
+dump(
+    list = c("program")
+  , file = paste0("submissions", .Platform$file.sep, "program.R")
+)
 ## we also generate the 'metadata' file
-cat("command: Rscript $program/program.R $input $output", file = "metadata")
+cat(
+    "command: Rscript $program/program.R $input $output"
+  , file = paste0("submissions", .Platform$file.sep, "metadata")
+)
 
 ## we create the associated zip file :
-zip_program <- paste0("program_", format(x = Sys.time( ), format = "%Y_%m_%d_%s"), ".zip")
-zip::zipr(zipfile = zip_program, files = c("program.R", "metadata") )
+zip_program <- paste0("submissions", .Platform$file.sep, "program_", format(x = Sys.time( ), format = "%Y_%m_%d_%S"), ".zip")
+zip::zipr(
+         zipfile = zip_program
+       , files   = paste0("submissions", .Platform$file.sep, c("program.R", "metadata") )
+     )
 print(x = zip_program)
 ```
 
 # Generate a zip file with the estimation of the parameters of mean and covariance
 
 ```{r label = "Submission - results zip file", echo = TRUE, results = "verbatim"}
+if ( !dir.exists(paths = "submissions") ) {
+    dir.create(path = "submissions")
+}
+
 ## we save the estimated A matrix as a rds file named 'results.rds' :
-saveRDS(object = res, file = "results.rds" )
+saveRDS(
+    object = res
+  , file   = paste0("submissions", .Platform$file.sep, "results.rds")
+)
 
 ## we create the associated zip file :
-zip_results <- paste0("results_", format(x = Sys.time( ), format = "%Y_%m_%d_%s"), ".zip")
-zip::zipr(zipfile = zip_results, files = c("results.rds") )
+zip_results <- paste0("submissions", .Platform$file.sep, "results_", format(x = Sys.time( ), format = "%Y_%m_%d_%S"), ".zip")
+zip::zipr(
+         zipfile = zip_results
+       , files   = paste0("submissions", .Platform$file.sep, c("results.rds") )
+     )
 print(x = zip_results)
 ```
 

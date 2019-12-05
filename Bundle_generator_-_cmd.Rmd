@@ -116,7 +116,7 @@ Name of the directory to save the challenge : string between double quotes whito
 if ( is.null(x = configuration$name) ) {
     configuration$name <- readline(prompt = "Name of the challenge (format : string) [default : bundle_template] : ")
     if ( configuration$name == "" ) {
-        configuration$name <- "template"
+        configuration$name <- "bundle_template"
     }
 }
 print(x = configuration$name)
@@ -198,7 +198,7 @@ if ( is.na(x = configurationYaml$has_registration) ) {
 print(x = configurationYaml$has_registration)
 ```
 
-- `start_date` : YYYY-mm-dd HH:MM:SS UTC.
+- `start_date` : YYYY-mm-dd HH:MM:SS (UTC time zone).
 ```{r label = "GENERATOR - Start date"}
 tempTime <- as.POSIXct(x = Sys.time( ), tz = "GMT")
 if ( is.null(x = configuration$start_date) ) {
@@ -211,7 +211,7 @@ remove(list = "tempTime")
 print(x = configurationYaml$start_date)
 ```
 
-- `end_date` : YYYY-mm-dd HH:MM:SS UTC. No end date if left blank
+- `end_date` : YYYY-mm-dd HH:MM:SS (UTC time zone). No end date if left blank
 ```{r label = "GENERATOR - End date"}
 tempTime <- as.POSIXct(x = Sys.time( ) + 3600 * 24 * 365, tz = "GMT")
 if ( is.null(x = configuration$end_date) ) {
@@ -398,7 +398,7 @@ print(x = configurationYaml$admin_names)
       }
       print(x = configurationYaml$phases[[ phase_idx_c ]]$description)
 
-      cat("  - `start_date` : YYYY-mm-dd HH:MM:SS UTC, Phase start (ends when new phase begins)\n")
+      cat("  - `start_date` : YYYY-mm-dd HH:MM:SS (UTC time zone). Phase start (ends when new phase begins)\n")
       tempTime <- as.POSIXct(x = Sys.time( ), tz = "GMT")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "start_date", sep = "_" ) ]] ) ) {
           configurationYaml$phases[[ phase_idx_c ]]$start_date <- readline(prompt = paste("Start date (format : YYYY-mm-dd HH:MM:SS UTC) [default : ", tempTime, "] : ", sep = "") )
