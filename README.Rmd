@@ -1,10 +1,7 @@
 ---
 title: "README"
 output:
-  html_document:
-    number_sections: true
-    toc: true
-    toc_depth: 2
+  md_document
 params:
   package_repository: "https://cloud.r-project.org"
 ---
@@ -19,7 +16,7 @@ In a *R* terminal, run the following command :
 You can also generate a toy bundle, with the parameters by default, with *Rscript* :
 `Rsript -e 'rmarkdown::render(input = "Bundle_generator_-_cmd.Rmd", envir = new.env( ) )'`
 
-# [WIP] Test the Codalab bundle
+# Test the Codalab bundle
 
 In a *R* terminal, run the following command :
 `rmarkdown::render(input = "Bundle_test.Rmd", envir = new.env( ) )`
