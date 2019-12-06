@@ -5,7 +5,6 @@ output:
     number_sections: true
     toc: true
     toc_depth: 2
-    toc_float: true
 params:
   package_repository: "https://cloud.r-project.org"
 ---
@@ -31,8 +30,8 @@ knitr::opts_chunk$set(cache.comments = FALSE)
 
 # Package dependencies
 
-- R.utils (to extract the arguments from the command line)
-- rmarkdown (to generate the R and html files from Rmd file)
+- R.utils   : to extract the arguments from the command line
+- rmarkdown : to generate the R and html files from Rmd file
 
 ```{r label = "GENERATOR - Package dependencies"}
 auto_install <- readline(prompt = "Should the dependencies be automatically checked and installed ? (format : TRUE / FALSE) [default = TRUE] : ")
@@ -1214,12 +1213,6 @@ save(
   , file = "save.RData"
 )
 ```
-
-# [WIP] Rendering of a web site to previsualize the competition
-
-It gives you the possibility to visualize your competition with a minimalist website which looks like the Codalab platform.
-`rmarkdown::render_site(input = "GENERATOR.Rmd", envir = new.env( ) )`
-
 
 # Session Information
 

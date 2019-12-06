@@ -5,7 +5,6 @@ output:
     number_sections: true
     toc: true
     toc_depth: 2
-    toc_float: true
 ---
 
 TEMPLATE : a description of the public / input / reference data sets for each phase.

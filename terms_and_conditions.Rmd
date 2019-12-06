@@ -5,7 +5,6 @@ output:
     number_sections: true
     toc: true
     toc_depth: 2
-    toc_float: true
 ---
 
 TEMPLATE : a description of the challenge rules, in particular if there will public submissions.
