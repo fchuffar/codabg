@@ -91,7 +91,7 @@ sink(file = output_program, append = FALSE)
 utils::Rprof(
     filename         = output_profiling
   , append           = FALSE
-  , interval         = 0.5
+  , interval         = 0.1
   , memory.profiling = TRUE
   , gc.profiling     = FALSE
   , line.profiling   = TRUE

@@ -1,10 +1,12 @@
 ---
 title: "Detailed results"
-author: `r Sys.info( )[ "user" ]`
-date: `r Sys.Date( )`
+#author: `r Sys.info( )[ "user" ]`
+#date: `r Sys.Date( )`
 output:
   html_document:
     number_sections: true
+    toc: true
+    toc_depth: 2
     fig_caption: yes
 ---
 
@@ -12,7 +14,7 @@ output:
 knitr::opts_chunk$set(collapse = TRUE, comment = "", echo = FALSE)
 ```
 
-## Summary of the submission
+# Summary of the submission
 
 - estimated parameter :
 ```{r estimation}
@@ -24,9 +26,11 @@ str(object = estimation)
 print(x = scores)
 ```
 
+# Profiling of the submission
+
 - profiling (if code submission) :
 ```{r profiling}
-if ( exists(x = "profiling") {
+if ( exists(x = "profiling") ) {
     print(x = profiling)
 }
 ```

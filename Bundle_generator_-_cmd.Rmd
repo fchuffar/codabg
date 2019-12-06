@@ -87,6 +87,7 @@ print(x = configuration$input_directory)
 if ( !dir.exists(paths = configuration$input_directory) ) {
     dir.create(path = configuration$input_directory)
 }
+setwd(dir = configuration$input_directory)
 ```
 
 Load existing configuration file : TRUE / FALSE. If TRUE, it will load `configuration.rds` file.
@@ -113,9 +114,9 @@ if ( configuration$loadConfigurationFile ) {
 Name of the directory to save the challenge : string between double quotes whitout white space
 ```{r label = "GENERATOR - Challenge name"}
 if ( is.null(x = configuration$name) ) {
-    configuration$name <- readline(prompt = "Name of the challenge (format : string) [default : bundle_template] : ")
+    configuration$name <- readline(prompt = "Name of the challenge (format : string) [default : bundle] : ")
     if ( configuration$name == "" ) {
-        configuration$name <- "bundle_template"
+        configuration$name <- "bundle"
     }
 }
 print(x = configuration$name)
@@ -495,10 +496,10 @@ print(x = configurationYaml$admin_names)
 
       cat("  - `input_data` : Zip file. Data fed to submission. No need if is_scoring_only == TRUE\n")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "input_data", sep = "_" ) ]] ) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$input_data <- readline(prompt = "Input data (format : filename with .zip extension (e.g. 'input_data.zip'), if 'no' the entry is removed from the configuration) [default : no] : ")
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- readline(prompt = "Input data (format : filename with .zip extension (e.g. 'input_data.zip'), if 'no' the entry is removed from the configuration) [default : input_data.zip] : ")
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$input_data == "" ) {
-          configurationYaml$phases[[ phase_idx_c ]]$input_data <- "no"
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- "input_data.zip"
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$input_data == "no" ) {
           configurationYaml$phases[[ phase_idx_c ]]$input_data <- NULL
@@ -516,10 +517,10 @@ print(x = configurationYaml$admin_names)
 
       cat("  - `ingestion_program` :\n")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "ingestion_program", sep = "_" ) ]] ) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- readline(prompt = "Ingestion program (format : filename with .zip extension (e.g. ingestion_program.zip), if 'no' the entry is removed from the configuration) [default : no] : ")
+          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- readline(prompt = "Ingestion program (format : filename with .zip extension (e.g. ingestion_program.zip), if 'no' the entry is removed from the configuration) [default : ingestion_program.zip] : ")
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$ingestion_program == "" ) {
-          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- "no"
+          configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- "ingestion_program.zip"
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$ingestion_program == "no" ) {
           configurationYaml$phases[[ phase_idx_c ]]$ingestion_program <- NULL
