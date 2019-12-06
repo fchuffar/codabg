@@ -5,6 +5,7 @@
 test/
 *.csv
 *.html
+*.md
 *.pdf
 *.rds
 *.RData
