@@ -30,7 +30,7 @@ print(x = scores)
 
 - profiling (if code submission) :
 ```{r profiling}
-if ( exists(x = "profiling") ) {
-    print(x = profiling)
-}
+# if ( exists(x = "profiling") ) {
+#     print(x = profiling)
+# }
 ```
