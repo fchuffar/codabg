@@ -111,6 +111,15 @@ reference <- readRDS(file = paste0(input, .Platform$file.sep, "ref", .Platform$f
 scoreFile <- paste0(output, .Platform$file.sep, "scores.txt")
 
 
+## Quality checks :
+## ========================================================================== ##
+
+for ( i in names(x = reference) ) {
+    if ( sum( is.na(x = estimation[[ i ]] ) ) > 0 ) {
+        print(x = "WARNING : the estimation has some NA values.")
+    }
+}
+
 
 ## Scoring :
 ## ========================================================================== ##

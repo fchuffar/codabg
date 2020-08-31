@@ -1,0 +1,12 @@
+'': /usr/lib/R/bin/exec/R
+slave: yes
+no-restore: yes
+e: rmarkdown::render("Bundle_generator_-_cmd.Rmd")
+input_directory: /home/alexis/DATA/Travail/UGA/TIMC/Projects/Codalab/Codalab_bundle_generation
+loadConfigurationFile: no
+name: bundle
+html_additional_page_number: 0.0
+phase_number: 1.0
+phases_1_external_datasets_number: 0.0
+score_number: 1.0
+average_score_use: no
