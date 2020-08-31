@@ -1,3 +1,13 @@
+if (!exists("trimws")) {
+  trimws = function (x, which = c("both", "left", "right"), whitespace = "[ \t\r\n]") {
+      which <- match.arg(which)
+      mysub <- function(re, x) sub(re, "", x, perl = TRUE)
+      switch(which, left = mysub(paste0("^", whitespace, "+"), 
+          x), right = mysub(paste0(whitespace, "+$"), x), both = mysub(paste0(whitespace, 
+          "+$"), mysub(paste0("^", whitespace, "+"), x)))
+  }
+}
+
 ## ========================================================================== ##
 ##
 ## Authors: Alexis ARNAUD, UGA
@@ -139,7 +149,7 @@ print(x = "Scores :")
 print(x = paste0(paste( paste(names(x = scores), scores, sep = " = "), collapse = ", ") ) )
 
 ## Generation of the score file :
-cat(paste0("MAE: ", sum( unlist(x = scores) ), "\n"), file = scoreFile, append = FALSE)
+cat(paste0("score_1: ", sum( unlist(x = scores) ), "\n"), file = scoreFile, append = FALSE)
 if ( length(x = scores) >= 2 ) {
     for ( i in names(x = scores) ) {
         cat(paste0(i , ": ", scores[[ i ]], "\n"), file = scoreFile, append = TRUE)

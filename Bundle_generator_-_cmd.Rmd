@@ -200,7 +200,7 @@ print(x = configurationYaml$has_registration)
 
 - `start_date` : YYYY-mm-dd HH:MM:SS (UTC time zone).
 ```{r label = "GENERATOR - Start date"}
-tempTime <- as.POSIXct(x = Sys.time( ), tz = "GMT")
+tempTime <- as.POSIXct(x = Sys.time( ) - 3600 * 24, tz = "GMT")
 if ( is.null(x = configuration$start_date) ) {
     configurationYaml$start_date <- readline(prompt = paste("Start_Date (format : YYYY-mm-dd HH:MM:SS UTC) [default = ", tempTime, "] : ", sep = "") )
 }
@@ -348,7 +348,7 @@ print(x = configurationYaml$admin_names)
 - `Enable per submission metadata` : If checked, when submitting an entry, competitors will be asked for Team name, Method name, Method description, etc.
 - `Allow sharing of public submissions` : If checked, participants will be able to share their submissions with others.
 - `Enable forum` : If checked, participants will be able to make posts to the [forum](https://github.com/codalab/codalab-competitions/wiki/Organizer_Forum).
-- `Anonymous leaderboard` : If checked, participants' names will not appear in the leaderboard.
+- `Anonymous leaderboard` : If checked, participants’ names will not appear in the leaderboard.
 - `Enable Competition level teams` : If checked, per competition [team](https://github.com/codalab/codalab-competitions/wiki/Organizer_Teams) registration will be required for participation.
 - `Allow Organizer Teams` : the organizers can make teams ? [TODO : update the documentation]
 - `Organizers need to approve the new team` : If checked, the organizers will need to approve the [teams](https://github.com/codalab/codalab-competitions/wiki/Organizer_Teams).
@@ -399,7 +399,7 @@ print(x = configurationYaml$admin_names)
       print(x = configurationYaml$phases[[ phase_idx_c ]]$description)
 
       cat("  - `start_date` : YYYY-mm-dd HH:MM:SS (UTC time zone). Phase start (ends when new phase begins)\n")
-      tempTime <- as.POSIXct(x = Sys.time( ), tz = "GMT")
+      tempTime <- as.POSIXct(x = Sys.time( ) - 3600 * 24, tz = "GMT")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "start_date", sep = "_" ) ]] ) ) {
           configurationYaml$phases[[ phase_idx_c ]]$start_date <- readline(prompt = paste("Start date (format : YYYY-mm-dd HH:MM:SS UTC) [default : ", tempTime, "] : ", sep = "") )
       }
