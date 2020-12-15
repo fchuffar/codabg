@@ -1,8 +1,5 @@
-'': /usr/lib/R/bin/exec/R
-slave: yes
-no-restore: yes
-e: rmarkdown::render("Bundle_generator_-_cmd.Rmd")
-input_directory: /home/alexis/DATA/Travail/UGA/TIMC/Projects/Codalab/Codalab_bundle_generation
+'': /Users/florent/miniconda2/lib/R/bin/exec/R
+input_directory: /Users/florent/bundle_generation
 loadConfigurationFile: no
 name: bundle
 html_additional_page_number: 0.0

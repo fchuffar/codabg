@@ -44,38 +44,62 @@ set.seed(seed = as.integer(x = params$seed) )
 ## Generation
 
 ```{r label = "Generate data - Generation", echo = FALSE}
-## Number of observations :
-N <- 1e3
-## Number of dimensions :
-M <- 5
-## Simulation parameters :
-simulation            <- vector(mode = "list", length = 2)
-names(x = simulation) <- c("mean", "Sigma")
+nb_obs = 600
+nb_genes = 1000
+df = data.frame(
+  sex=c("M", "F")[round(runif(600))+1],
+  age = round((runif(600)+1)*40),
+  histology=c("ADK", "SQC")[round(runif(600))+1]
+)
+expr = (
+  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * (as.numeric(df$histology) - 1) +
+  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * (as.numeric(df$sex) - 1)      +
+  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * ((df$age>60) +0)              +
+  matrix(rnorm(nb_genes * nb_obs), nrow=nb_obs)
+)
+expr = expr - min(expr)
 
-simulation$mean  <- runif(n = M, min = -M, max = M)
-simulation$Sigma <- diag(x = runif(n = M, min = 1e-6, max = M), nrow = M, ncol = M, names = FALSE)
+colnames(expr) = paste0("GENE", sprintf(paste0("%0", nchar(nb_genes), "d"), 1:nb_genes))
+df = cbind(df, expr)
+rownames(df) = paste0("OBS", sprintf(paste0("%0", nchar(nb_obs), "d"), 1:nb_obs))
 
-print(x = "Public data set")
-public_data <- MASS::mvrnorm(
-                         n     = N
-                       , mu    = simulation$mean
-                       , Sigma = simulation$Sigma
-                     )
-str(object = public_data)
-
-print(x = "Input data set")
-input_data <- MASS::mvrnorm(
-                         n     = N
-                       , mu    = simulation$mean
-                       , Sigma = simulation$Sigma
-                     )
-str(object = input_data)
+head(df[, 1:10])
 ```
 
-## Save of the new data set
+## Export
 
-```{r label = "Generate data - Save", include = FALSE}
-saveRDS(object = public_data, file = "public_data.rds"   )
-saveRDS(object = input_data , file = "input_data.rds"    )
-saveRDS(object = simulation , file = "reference_data.rds")
+``` {r label="export"}
+data_train = df[1:(nb_obs-100)       , ]
+data_test  = df[(nb_obs-100+1):nb_obs, ]
+
+data_truth = data_test$histology
+names(data_truth) = rownames(data_test)
+print(data_truth)
+
+data_test[1:nrow(data_test),"histology"] = NA
+head(data_test[, 1:10])
+dim(data_test)
+print(data_test$histology)
+
+head(data_train[, 1:10])
+dim(data_train)
+print(data_train$histology)
+
+saveRDS(object = data_train , file = "data_train.rds")
+saveRDS(object = data_test  , file = "data_test.rds" )
+saveRDS(object = data_truth , file = "data_truth.rds")
 ```
+
+
+
+
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+

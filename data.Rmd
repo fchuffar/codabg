@@ -7,10 +7,20 @@ output:
     toc_depth: 2
 ---
 
-TEMPLATE : a description of the public / input / reference data sets for each phase.
 
-```{r label = "DATA - input", include = FALSE}
-public_data = readRDS(file = "public_data.rds")
+```{r echo=FALSE, results="hide"}
+data_train = readRDS(file = "data_train.rds")
+data_test = readRDS(file = "data_test.rds")
 ```
 
-- the public data set is composed of `r nrow(x = public_data)` observations and `r ncol(x = public_data)` variables.
+Provided data is  data frames `data_train` and `data_test`.
+
+- the train data set is composed of `r nrow(x = data_train)` observations and `r ncol(x = data_train)` variables.
+- the test data set is composed of `r nrow(x = data_test)` observations and `r ncol(x = data_test)` variables.
+
+```{r label = "DATA - input", echo=TRUE, results="verbatim"}
+head(data_train[,c(1:7)])
+dim(data_train)
+head(data_test[,c(1:7)])
+dim(data_test)
+```

@@ -484,10 +484,10 @@ print(x = configurationYaml$admin_names)
 
       cat("  - `public_data` : Zip file. Data downloadable by participants (in Files page).\n")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "public_data", sep = "_" ) ]] ) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$public_data <- readline(prompt = "Public data (format : filename with .zip extension, if 'no' the entry is removed from the configuration) [default : public_data.zip] : ")
+          configurationYaml$phases[[ phase_idx_c ]]$public_data <- readline(prompt = "Public data (format : filename with .zip extension, if 'no' the entry is removed from the configuration) [default : no] : ")
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$public_data == "" ) {
-          configurationYaml$phases[[ phase_idx_c ]]$public_data <- "public_data.zip"
+          configurationYaml$phases[[ phase_idx_c ]]$public_data <- "no"
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$public_data == "no" ) {
           configurationYaml$phases[[ phase_idx_c ]]$public_data <- NULL
@@ -496,10 +496,10 @@ print(x = configurationYaml$admin_names)
 
       cat("  - `input_data` : Zip file. Data fed to submission. No need if is_scoring_only == TRUE\n")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "input_data", sep = "_" ) ]] ) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$input_data <- readline(prompt = "Input data (format : filename with .zip extension (e.g. 'input_data.zip'), if 'no' the entry is removed from the configuration) [default : input_data.zip] : ")
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- readline(prompt = "Input data (format : filename with .zip extension (e.g. 'starting_kit.zip'), if 'no' the entry is removed from the configuration) [default : starting_kit.zip] : ")
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$input_data == "" ) {
-          configurationYaml$phases[[ phase_idx_c ]]$input_data <- "input_data.zip"
+          configurationYaml$phases[[ phase_idx_c ]]$input_data <- "starting_kit.zip"
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$input_data == "no" ) {
           configurationYaml$phases[[ phase_idx_c ]]$input_data <- NULL
@@ -858,7 +858,7 @@ remove(list = c("useRmd", "message") )
   
 ## Evaluation
 
-The file `r configurationYaml$html$evaluation` is required for the tab Evaluation'.
+The file `r configurationYaml$html$evaluation` is required for the tab Evaluation.
 ```{r label = "GENERATOR - Generation html evaluation", include = FALSE}
 useRmd <- readline(prompt = paste("Generation of : ", configurationYaml$html$evaluation, " : use of the associated Rmd file (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
 useRmd <- as.logical(x = useRmd)
@@ -982,63 +982,63 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
     phase_idx_c <- as.character(x = phase_idx)
     cat( paste("Phase ", phase_idx, " :\n", sep = "") )
     
-    if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$public_data) ) {
-        cat("  - `public data` :\n")
-        zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$public_data, sep = "")
-        useFile <- FALSE
-        if ( file.exists( zipName ) ) {
-            useFile <- readline(prompt = paste("Phase ", phase_idx, " : public data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
-            useFile <- as.logical(x = useFile)
-            if ( is.na(x = useFile) ) {
-                useFile <- FALSE
-            }
-        }
-        if ( !useFile ) {
-            files <- readline(prompt = paste("Phase ", phase_idx, " : public data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$public_data, "' (format : comma separated filenames) [default : public_data.rds] : ", sep = "") )
-            if ( files == "" ) {
-                files <- "public_data.rds"
-            }
-            files <- unlist(x = strsplit(x = files, split = ",") )
-            zip::zipr(
-                zipfile = zipName
-              , files   = files
-            )
-            remove(list = "files")
-        }
-        for ( file in utils::unzip(zipName, list = TRUE)$Name ) {
-            cat( paste("  |-> ", file, "\n", sep = "") )
-        }
-        remove(list = c("zipName", "useFile", "file") )
-    }
-    
-    if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$input_data) ) {
-        cat("  - `input data` :\n")
-        zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$input_data, sep = "")
-        useFile <- FALSE
-        if ( file.exists( zipName ) ) {
-            useFile <- readline(prompt = paste("Phase ", phase_idx, " : input data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
-            useFile <- as.logical(x = useFile)
-            if ( is.na(x = useFile) ) {
-                useFile <- FALSE
-            }
-        }
-        if ( !useFile ) {
-            files <- readline(prompt = paste("Phase ", phase_idx, " : input data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$input_data, "' (format : comma separated filenames) [default : input_data.rds] : ", sep = "") )
-            if ( files == "" ) {
-                files <- "input_data.rds"
-            }
-            files <- unlist(x = strsplit(x = files, split = ",") )
-            zip::zipr(
-                zipfile = zipName
-              , files   = files
-            )
-            remove(list = "files")
-        }
-        for ( file in utils::unzip(zipName, list = TRUE)$Name ) {
-            cat( paste("  |-> ", file, "\n", sep = "") )
-        }
-        remove(list = c("zipName", "useFile", "file") )
-    }
+    # if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$public_data) ) {
+    #     cat("  - `public data` :\n")
+    #     zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$public_data, sep = "")
+    #     useFile <- FALSE
+    #     if ( file.exists( zipName ) ) {
+    #         useFile <- readline(prompt = paste("Phase ", phase_idx, " : public data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+    #         useFile <- as.logical(x = useFile)
+    #         if ( is.na(x = useFile) ) {
+    #             useFile <- FALSE
+    #         }
+    #     }
+    #     if ( !useFile ) {
+    #         files <- readline(prompt = paste("Phase ", phase_idx, " : public data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$public_data, "' (format : comma separated filenames) [default : public_data.rds] : ", sep = "") )
+    #         if ( files == "" ) {
+    #             files <- "public_data.rds"
+    #         }
+    #         files <- unlist(x = strsplit(x = files, split = ",") )
+    #         zip::zipr(
+    #             zipfile = zipName
+    #           , files   = files
+    #         )
+    #         remove(list = "files")
+    #     }
+    #     for ( file in utils::unzip(zipName, list = TRUE)$Name ) {
+    #         cat( paste("  |-> ", file, "\n", sep = "") )
+    #     }
+    #     remove(list = c("zipName", "useFile", "file") )
+    # }
+    #
+    # if ( !is.null(x = configurationYaml$phases[[ phase_idx_c ]]$input_data) ) {
+    #     cat("  - `input data` :\n")
+    #     zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$input_data, sep = "")
+    #     useFile <- FALSE
+    #     if ( file.exists( zipName ) ) {
+    #         useFile <- readline(prompt = paste("Phase ", phase_idx, " : input data : should we use the existing zip file '", zipName, "' (format : TRUE / FALSE) [default : FALSE] : ", sep = "") )
+    #         useFile <- as.logical(x = useFile)
+    #         if ( is.na(x = useFile) ) {
+    #             useFile <- FALSE
+    #         }
+    #     }
+    #     if ( !useFile ) {
+    #         files <- readline(prompt = paste("Phase ", phase_idx, " : input data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$input_data, "' (format : comma separated filenames) [default : input_data.rds] : ", sep = "") )
+    #         if ( files == "" ) {
+    #             files <- "input_data.rds"
+    #         }
+    #         files <- unlist(x = strsplit(x = files, split = ",") )
+    #         zip::zipr(
+    #             zipfile = zipName
+    #           , files   = files
+    #         )
+    #         remove(list = "files")
+    #     }
+    #     for ( file in utils::unzip(zipName, list = TRUE)$Name ) {
+    #         cat( paste("  |-> ", file, "\n", sep = "") )
+    #     }
+    #     remove(list = c("zipName", "useFile", "file") )
+    # }
     
     cat("  - `reference data` :\n")
     zipName <- paste(configuration$name, .Platform$file.sep, configurationYaml$phases[[ phase_idx_c ]]$reference_data, sep = "")
@@ -1083,7 +1083,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
             rmarkdown::render(input = startingKitRmdFile, envir = new.env( ) )
             filesTemp <- c(
                 sub(pattern = ".Rmd", replacement = ".html", x = startingKitRmdFile)
-              , "submission_script.Rmd"
+                , "submission_script.Rmd", "data_train.rds", "data_test.rds"
             )
             filesTemp <- unique(x = filesTemp)
             files <- readline(prompt = paste("Phase ", phase_idx, " : starting kit : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$starting_kit, "' (format : comma separated filenames) [default : ", paste(filesTemp, collapse = ","), "] : ", sep = "") )
