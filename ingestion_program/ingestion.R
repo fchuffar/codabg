@@ -1,13 +1,3 @@
-if (!exists("trimws")) {
-  trimws = function (x, which = c("both", "left", "right"), whitespace = "[ \t\r\n]") {
-      which <- match.arg(which)
-      mysub <- function(re, x) sub(re, "", x, perl = TRUE)
-      switch(which, left = mysub(paste0("^", whitespace, "+"), 
-          x), right = mysub(paste0(whitespace, "+$"), x), both = mysub(paste0(whitespace, 
-          "+$"), mysub(paste0("^", whitespace, "+"), x)))
-  }
-}
-
 ## ========================================================================== ##
 ##
 ## Authors: Alexis ARNAUD, UGA
@@ -73,11 +63,12 @@ print(x = list.files(path = submission_program , all.files = TRUE, full.names = 
 output_program       <- paste0(output, .Platform$file.sep, "output_program.txt")
 output_profiling     <- paste0(output, .Platform$file.sep, "Rprof.out"         )
 output_profiling_rds <- paste0(output, .Platform$file.sep, "Rprof.rds"         )
-output_results       <- paste0(output, .Platform$file.sep, "results.rds"       )
+output_results       <- paste0(output, .Platform$file.sep, "results.txt"       )
 file.create(output_program, output_profiling)
 
 ## read input data :
-input <- readRDS(file = paste0(input, .Platform$file.sep, "input_data.rds") )
+data_train <- readRDS(file = paste0(input, .Platform$file.sep, "data_train.rds") )
+data_test <- readRDS(file = paste0(input, .Platform$file.sep, "data_test.rds") )
 
 ## read code submitted by the participants :
 .tempEnv <- new.env( )
@@ -106,8 +97,9 @@ utils::Rprof(
   , gc.profiling     = FALSE
   , line.profiling   = TRUE
 )
-prediction <- program(
-    input = input
+data_pred <- program(
+  data_train = data_train,
+  data_test = data_test
 )
 utils::Rprof(filename = NULL)
 
@@ -116,10 +108,19 @@ profiling <- utils::summaryRprof(filename = output_profiling, memory = "both", l
 ## stop diverting R output to a text file
 sink(file = NULL)
 
-saveRDS(
-    object = prediction
-  , file   = output_results
+# saveRDS(
+#     object = data_pred
+#   , file   = output_results
+# )
+
+write.table(
+  x=data_pred, 
+  file= output_results,
+  quote=FALSE,
+  row.names=FALSE,
+  col.names=FALSE
 )
+
 saveRDS(
     object = profiling
   , file   = output_profiling_rds

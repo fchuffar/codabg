@@ -44,17 +44,17 @@ set.seed(seed = as.integer(x = params$seed) )
 ## Generation
 
 ```{r label = "Generate data - Generation", echo = FALSE}
-nb_obs = 600
-nb_genes = 1000
+nb_obs = 200
+nb_genes = 100
 df = data.frame(
-  sex=c("M", "F")[round(runif(600))+1],
-  age = round((runif(600)+1)*40),
-  histology=c("ADK", "SQC")[round(runif(600))+1]
+  sex=c("M", "F")[round(runif(nb_obs))+1],
+  age = round((runif(nb_obs)+1)*40),
+  histology=c("AD", "SC")[round(runif(nb_obs))+1]
 )
 expr = (
   matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * (as.numeric(df$histology) - 1) +
-  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * (as.numeric(df$sex) - 1)      +
-  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * ((df$age>60) +0)              +
+  matrix(rep(rnorm(nb_genes, 0, 0.5), each=nb_obs), nrow=nb_obs) * (as.numeric(df$sex      ) - 1) +
+  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * ((df$age>60) +0)               +
   matrix(rnorm(nb_genes * nb_obs), nrow=nb_obs)
 )
 expr = expr - min(expr)
@@ -72,18 +72,18 @@ head(df[, 1:10])
 data_train = df[1:(nb_obs-100)       , ]
 data_test  = df[(nb_obs-100+1):nb_obs, ]
 
-data_truth = data_test$histology
+data_truth = data_test$sex
 names(data_truth) = rownames(data_test)
 print(data_truth)
 
-data_test[1:nrow(data_test),"histology"] = NA
+data_test[1:nrow(data_test),"sex"] = NA
 head(data_test[, 1:10])
 dim(data_test)
-print(data_test$histology)
+print(data_test$sex)
 
 head(data_train[, 1:10])
 dim(data_train)
-print(data_train$histology)
+print(data_train$sex)
 
 saveRDS(object = data_train , file = "data_train.rds")
 saveRDS(object = data_test  , file = "data_test.rds" )

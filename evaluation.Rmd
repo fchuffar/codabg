@@ -7,4 +7,14 @@ output:
     toc_depth: 2
 ---
 
-TEMPLATE : a description of the metrics used during each phase.
+The metric used is the Incorrect Answers Proportion (IAP).
+
+
+```{r echo=FALSE, results="hide"}
+source("scoring_program/scoring_functions.R")
+```
+
+```{r echo=TRUE, results="verbatim"}
+print(IAP)
+print(compare)
+```

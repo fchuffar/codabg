@@ -1,13 +1,3 @@
-if (!exists("trimws")) {
-  trimws = function (x, which = c("both", "left", "right"), whitespace = "[ \t\r\n]") {
-      which <- match.arg(which)
-      mysub <- function(re, x) sub(re, "", x, perl = TRUE)
-      switch(which, left = mysub(paste0("^", whitespace, "+"), 
-          x), right = mysub(paste0(whitespace, "+$"), x), both = mysub(paste0(whitespace, 
-          "+$"), mysub(paste0("^", whitespace, "+"), x)))
-  }
-}
-
 ## ========================================================================== ##
 ##
 ## Authors: Alexis ARNAUD, UGA
@@ -30,57 +20,6 @@ remove(list = "package")
 
 
 
-## Scoring functions :
-##  - MAE     : the metric to compare 2 vectors or matrices
-##  - compare : the scoring function
-## ========================================================================== ##
-
-#' The Mean Absolute Error (MAE)
-#'
-#' @param reference a vector or a matrix
-#' @param estimation a vector or a matrix, with same dimensions as the 'reference' parameter
-#' @return the mean absolute error between the two provided vectors or matrices
-MAE <- function(reference, estimation) {
-    return( mean(x = abs(x = reference - estimation) ) )
-}
-
-#' The function to compare 2 vectors or 2 matrices
-#'
-#' @param reference a vector or a matrix
-#' @param estimation a vector or a matrix, with same dimensions as the 'reference' parameter
-#' @param metric the name of the function to use as a metric
-#' @return the measure obtain from the metric
-compare <- function(reference, estimation, metric = "MAE") {
-    stopifnot(
-        exprs = {
-            is.vector(x = reference) && is.vector(x = estimation)
-        } || {
-            is.matrix(x = reference) && is.matrix(x = estimation)
-        }
-    )
-
-    if ( is.vector(x = reference) ) {
-        stopifnot(
-            exprs = length(x = reference) == length(x = estimation)
-        )
-    }
-    if ( is.matrix(x = reference) ) {
-        stopifnot(
-            exprs = {
-                nrow(x = reference) == nrow(x = estimation)
-            } && {
-                ncol(x = reference) == ncol(x = estimation)
-            }
-        )
-    }
-
-    ## Computation of the metric :
-    res <- get(x = metric)(reference = reference, estimation = estimation)
-    
-    return( res )
-}
-
-
 
 ## Input / Output parameters :
 ## ========================================================================== ##
@@ -90,10 +29,12 @@ args <- commandArgs(trailingOnly = TRUE)
 
 ## input data directory :
 input   <- trimws(x = args[ 1 ] )
-## output directory (where predictions are written) :
+## output directory (where data_preds are written) :
 output  <- trimws(x = args[ 2 ] )
 ## scoring program directory :
 program <- trimws(x = args[ 3 ] )
+
+source(paste0(program, "/scoring_functions.R"))
 
 ## We display some information for debug purpose :
 print(x = "Input directory :")
@@ -104,9 +45,11 @@ print(x = "Scoring program directory :")
 print(x = list.files(path = program, all.files = TRUE, full.names = TRUE, recursive = TRUE) )
 
 ## load submited results from participant or participant program :
-estimation <- readRDS(file = paste0(input, .Platform$file.sep, "res", .Platform$file.sep, "results.rds") )
+# data_pred <- readRDS(file = paste0(input, .Platform$file.sep, "res", .Platform$file.sep, "results.rds") )
+# data_pred = read.table("submissions/results.txt", stringsAsFactors=FALSE)
+data_pred = read.table(paste0(input, .Platform$file.sep, "res", .Platform$file.sep, "results.txt"), stringsAsFactors=FALSE)
 
-## load R profiling of the estimation (if existing) :
+## load R profiling of the data_pred (if existing) :
 profilingPath <- paste0(input, .Platform$file.sep, "res", .Platform$file.sep, "Rprof.rds")
 profiling <- NULL
 if ( file.exists( profilingPath ) ) {
@@ -114,47 +57,38 @@ if ( file.exists( profilingPath ) ) {
 }
 remove(list = c("profilingPath") )
 
-## load reference data :
-reference <- readRDS(file = paste0(input, .Platform$file.sep, "ref", .Platform$file.sep, "reference_data.rds") )
+## load data_truth data :
+# data_truth <- readRDS("~/projects/bundle_generation/histpred2.0/data_truth.rds")
+data_truth <- readRDS(file = paste0(input, .Platform$file.sep, "ref", .Platform$file.sep, "data_truth.rds") )
 
 ## Score file to write :
 scoreFile <- paste0(output, .Platform$file.sep, "scores.txt")
 
-
-## Quality checks :
-## ========================================================================== ##
-
-for ( i in names(x = reference) ) {
-    if ( sum( is.na(x = estimation[[ i ]] ) ) > 0 ) {
-        print(x = "WARNING : the estimation has some NA values.")
-    }
-}
 
 
 ## Scoring :
 ## ========================================================================== ##
 
 ## score participants :
-stopifnot(exprs = sum( names(x = reference) != names(x = estimation) ) == 0 )
+# stopifnot(exprs = sum( names(x = data_truth) != names(x = data_pred) ) == 0 )
 
-scores <- lapply(
-    X = names(x = reference)
-  , FUN = function( x ) {
-      compare(reference = reference[[ x ]], estimation = estimation[[ x ]], metric = "MAE")
-  }
-)
-names(x = scores) <- names(x = reference)
+# source("~/projects/bundle_generation/histpred2.0/scoring_program/scoring_functions.R")
+scores <- compare(data_truth=as.vector(data_truth), data_pred=data_pred[,1])
+# names(x = scores) <- names(x = data_truth)
 
-print(x = "Scores :")
-print(x = paste0(paste( paste(names(x = scores), scores, sep = " = "), collapse = ", ") ) )
+# print(x = "Scores :")
+# print(x = paste0(paste( paste(names(x = scores), scores, sep = " = "), collapse = ", ") ) )
+
+print(paste0("score_1: ", sum( unlist(x = scores))))
+
 
 ## Generation of the score file :
 cat(paste0("score_1: ", sum( unlist(x = scores) ), "\n"), file = scoreFile, append = FALSE)
-if ( length(x = scores) >= 2 ) {
-    for ( i in names(x = scores) ) {
-        cat(paste0(i , ": ", scores[[ i ]], "\n"), file = scoreFile, append = TRUE)
-    }
-}
+# if ( length(x = scores) >= 2 ) {
+#     for ( i in names(x = scores) ) {
+#         cat(paste0(i , ": ", scores[[ i ]], "\n"), file = scoreFile, append = TRUE)
+#     }
+# }
 
 ## Generation of a (more) detailed file :
 rmarkdown::render(

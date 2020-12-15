@@ -11,3 +11,6 @@ test/
 *.RData
 *.Rhistory
 *.zip
+00_kfold.Rmd
+clean.sh
+.DS_Store

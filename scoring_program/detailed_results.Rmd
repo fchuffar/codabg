@@ -17,8 +17,8 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "", echo = FALSE)
 # Summary of the submission
 
 - estimated parameter :
-```{r estimation}
-str(object = estimation)
+```{r data_pred}
+str(object = data_pred)
 ```
 
 - scores :

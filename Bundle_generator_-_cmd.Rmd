@@ -72,7 +72,7 @@ configuration <- R.utils::commandArgs(
   , asValues     = TRUE
   , unique       = TRUE
 )
-configurationYaml <- NULL
+configurationYaml = list(competition_docker_image="fchuffar/codalabio")
 ```
 
 Path of the directory with the files to create the challenge : string between double quotes (preferably without white space). The working directory of R will then be set to this directory.
@@ -132,10 +132,10 @@ if ( !dir.exists(paths = configuration$name) ) {
 - `title` : string between double quotes
 ```{r label = "GENERATOR - Title"}
 if ( is.null(x = configuration$title) ) {
-    configurationYaml$title <- readline(prompt = "Title (format : string) [default = TEMPLATE : title.] : ")
+    configurationYaml$title <- readline(prompt = "Title (format : string) [default = ...] : ")
 }
 if ( configurationYaml$title == "" ) {
-    configurationYaml$title <- "TEMPLATE : title."
+    configurationYaml$title <- "Sample sex prediction challenge 0.1 (sexpred0.1)"
 }
 print(x = configurationYaml$title)
 ```
@@ -143,10 +143,10 @@ print(x = configurationYaml$title)
 - `description` : string between double quotes (max 256 characters)
 ```{r label = "GENERATOR - Description"}
 if ( is.null(x = configuration$description) ) {
-    configurationYaml$description <- readline(prompt = "Description (format : string, max 256 characters) [default = TEMPLATE : description.] : ")
+    configurationYaml$description <- readline(prompt = "Description (format : string, max 256 characters) [default = ...] : ")
 }
 if ( configurationYaml$description == "" ) {
-    configurationYaml$description <- "TEMPLATE : description."
+    configurationYaml$description <- "The challenge provides the data.frame `d` of tumoral samples described by sex, age, histology and genes expression values. Some sex status are missing. The goal of the challenge is to use statistical models (e.g. logistic regression) to predict missing sex status using provided gene expression values and clinical attributes."
 }
 print(x = configurationYaml$description)
 ```
@@ -391,10 +391,11 @@ print(x = configurationYaml$admin_names)
 
       cat("  - `description` : String. Short phase description\n")
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "description", sep = "_" ) ]] ) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$description <- readline(prompt = "Description (format : string) [default = TEMPLATE : phase description.] : ")
+          configurationYaml$phases[[ phase_idx_c ]]$description <- readline(prompt = "Description (format : string) [default = ...] : ")
       }
       if ( configurationYaml$phases[[ phase_idx_c ]]$description == "" ) {
-          configurationYaml$phases[[ phase_idx_c ]]$description <- "TEMPLATE : phase description."
+          configurationYaml$phases[[ phase_idx_c ]]$description <- "
+Phase 1 is the only phase of this challenge."
       }
       print(x = configurationYaml$phases[[ phase_idx_c ]]$description)
 
@@ -1051,9 +1052,9 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
         }
     }
     if ( !useFile ) {
-        files <- readline(prompt = paste("Phase ", phase_idx, " : reference data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$reference_data, "' (format : comma separated filenames) [default : reference_data.rds] : ", sep = "") )
+        files <- readline(prompt = paste("Phase ", phase_idx, " : reference data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$reference_data, "' (format : comma separated filenames) [default : data_truth.rds] : ", sep = "") )
         if ( files == "" ) {
-            files <- "reference_data.rds"
+            files <- "data_truth.rds"
         }
         files <- unlist(x = strsplit(x = files, split = ",") )
         zip::zipr(
