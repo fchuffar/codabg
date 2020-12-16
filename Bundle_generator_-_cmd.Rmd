@@ -248,12 +248,13 @@ print(x = configurationYaml$admin_names)
 ```
 
 - `html` :
-  ```{r label = "GENERATOR - Html files", include = FALSE}
+
+```{r label = "GENERATOR - Html files", include = FALSE}
   configurationYaml$html <- NULL
-  ```
+```
   
   - `overview` : overview.html file : detailed competition description.
-  ```{r label = "GENERATOR - Html overview"}
+```{r label = "GENERATOR - Html overview"}
   if ( is.null(x = configuration$html_overview) ) {
       configurationYaml$html$overview <- readline(prompt = "Html file : overview (format : filename with html extension) [default = overview.html] : ")
   }
@@ -261,10 +262,10 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$overview <- "overview.html"
   }
   print(x = configurationYaml$html$overview)
-  ```
+```
 
   - `evaluation` : evaluation.html : Instructions and evaluation metrics.
-  ```{r label = "GENERATOR - Html evaluation"}
+```{r label = "GENERATOR - Html evaluation"}
   if ( is.null(x = configuration$html_evaluation) ) {
       configurationYaml$html$evaluation <- readline(prompt = "Html file : evaluation (format : filename with html extension) [default = evaluation.html] : ")
   }
@@ -272,10 +273,10 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$evaluation <- "evaluation.html"
   }
   print(x = configurationYaml$html$evaluation)
-  ```
+```
 
   - `terms` : terms_and_conditions.html : Rules and prizes.
-  ```{r label = "GENERATOR - Html terms"}
+```{r label = "GENERATOR - Html terms"}
   if ( is.null(x = configuration$html_terms_and_conditions) ) {
       configurationYaml$html$terms <- readline(prompt = "Html file : terms and conditions (format : filename with html extension) [default = terms_and_conditions.html] : ")
   }
@@ -283,10 +284,10 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$terms <- "terms_and_conditions.html"
   }
   print(x = configurationYaml$html$terms)
-  ```
+```
 
   - `data` : data.html : Dataset description.
-  ```{r label = "GENERATOR - Html data"}
+```{r label = "GENERATOR - Html data"}
   if ( is.null(x = configuration$html_data) ) {
       configurationYaml$html$data <- readline(prompt = "Html file : data (format : filename with html extension) [default = data.html] : ")
   }
@@ -294,10 +295,10 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$data <- "data.html"
   }
   print(x = configurationYaml$html$data)
-  ```
+```
 
   - additional pages (optional).
-  ```{r label = "GENERATOR - Additional html pages"}
+```{r label = "GENERATOR - Additional html pages"}
   if ( is.null(x = configuration$html_additional_page_number) ) {
       configuration$html_additional_page_number <- readline(prompt = "Number of additional html pages (format : integer) [default = 0] : ")
   }
@@ -337,7 +338,7 @@ print(x = configurationYaml$admin_names)
 
   ## Save of the configuration file :
   saveRDS(object = configuration, file = "configuration.rds")
-  ```
+```
 
 ## Some properties of competitions cannot be specified in the YAML file. However, they are available from the editor.
 
@@ -359,7 +360,7 @@ print(x = configurationYaml$admin_names)
 ## Phase properties using the YAML file
 
 - `phases` :
-  ```{r label = "GENERATOR - Phases"}
+```{r label = "GENERATOR - Phases"}
   configurationYaml$phases <- NULL
 
   if ( is.null(x = configuration$phase_number) ) {
@@ -613,7 +614,7 @@ Phase 1 is the only phase of this challenge."
 
   ## Save of the configuration file :
   saveRDS(object = configuration, file = "configuration.rds")
-  ```
+```
 
 ## Some phase properties cannot be specified in the YAML file. However, they are available from the editor:
 
@@ -622,7 +623,7 @@ Phase 1 is the only phase of this challenge."
 ## Leaderboard properties using the YAML file
 
 - `leaderboard` :
-  ```{r label = "GENERATOR - Leaderboard"}
+```{r label = "GENERATOR - Leaderboard"}
   configurationYaml$leaderboard <- NULL
   configurationYaml$leaderboard$leaderboards <- NULL
   configurationYaml$leaderboard$leaderboards$Results <- NULL
@@ -774,7 +775,7 @@ Phase 1 is the only phase of this challenge."
           , file         = "bundle.yaml"
           , fileEncoding = "UTF-8"
         )
-  ```
+```
 
 ## Leaderboard features accessible only using the online editor
     - `Show rank` : show the rank of the participants or not. It seems that the associated field ('show_rank') in the YAML file is not recognized, and we have to use the online editor to change this option [issue#2118](https://github.com/codalab/codalab-competitions/issues/2118).
@@ -873,6 +874,7 @@ if ( useRmd ) {
                  , output_dir = configuration$name
                  , quiet = TRUE
                  , envir = new.env( )
+                 , knit_root_dir = getwd()
                )
 } else {
     message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$evaluation, "' associated to the tab 'Evaluation'. Then press 'ENTER'.", sep = "") )

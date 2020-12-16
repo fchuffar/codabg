@@ -8,7 +8,7 @@ output:
 ---
 
 The metric used is the Incorrect Answers Proportion (IAP).
-
+The function IAP computes the proportion of wrong predictions submitted by the participant (`data_pred`) compared to the ground truth (`data_truth`)
 
 ```{r echo=FALSE, results="hide"}
 source("scoring_program/scoring_functions.R")

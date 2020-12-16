@@ -13,10 +13,9 @@ data_train = readRDS(file = "data_train.rds")
 data_test = readRDS(file = "data_test.rds")
 ```
 
-Provided data is  data frames `data_train` and `data_test`.
-
-- the train data set is composed of `r nrow(x = data_train)` observations and `r ncol(x = data_train)` variables.
-- the test data set is composed of `r nrow(x = data_test)` observations and `r ncol(x = data_test)` variables.
+The file `staring_kit.zip` available to download provides 2 data frames in rds format : 
+`data_train` : The training data set. It is composed of `r nrow(x = data_train)` observations and `r ncol(x = data_train)` variables.
+`data_test`: The test data. It is composed of `r nrow(x = data_test)` observations and `r ncol(x = data_test)` variables.
 
 ```{r label = "DATA - input", echo=TRUE, results="verbatim"}
 head(data_train[,c(1:7)])

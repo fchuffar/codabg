@@ -1,5 +1,9 @@
-'': /Users/florent/miniconda2/lib/R/bin/exec/R
-input_directory: /Users/florent/bundle_generation
+'': /usr/lib/R/bin/exec/R
+slave: yes
+no-save: yes
+no-restore: yes
+e: rmarkdown::render('/home/karkars/coda_lab/bundle_generation/Bundle_generator_-_cmd.Rmd',~+~~+~encoding~+~=~+~'UTF-8',~+~knit_root_dir~+~=~+~'~/coda_lab/bundle_generation');
+input_directory: /home/karkars/coda_lab/bundle_generation
 loadConfigurationFile: no
 name: bundle
 html_additional_page_number: 0.0

@@ -1,14 +1,3 @@
----
-title: "Submission script"
-output:
-  html_document:
-    number_sections: true
-    toc: true
-    toc_depth: 2
-params:
-  package_repository: "https://cloud.r-project.org"
-  install_dependencies: true
----
 
 # Package dependencies
 - zip : to generate the zip files that contain the programs or the results to submit to the Codalab platform.
