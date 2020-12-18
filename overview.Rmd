@@ -34,7 +34,14 @@ The unziped `starting_kit` directory contains :
 - A `submission_script.R` to modify and to use to submit your predictions.
 - The public data sets (`data_train.rds` and `data_test.rds` files).
 
-7. Then open R in the `starting_kit` directory, (e.g. open `submission_script.R` with RStudio), and launch the following command to generate the baseline submission as a zip file :
+7. Then open R in the `starting_kit` directory, (e.g. open `submission_script.R` with RStudio), and launch the following command to generate the baseline submission as a zip file:
+
+```
+source("submission_script.R")
+```
+
+Alternatively you can generate the baseline submission zip file with the Rscript command: 
+
 ```
 Rscript submission_script.R
 ```
