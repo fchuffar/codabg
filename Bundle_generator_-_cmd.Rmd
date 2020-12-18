@@ -135,7 +135,7 @@ if ( is.null(x = configuration$title) ) {
     configurationYaml$title <- readline(prompt = "Title (format : string) [default = ...] : ")
 }
 if ( configurationYaml$title == "" ) {
-    configurationYaml$title <- "Sample sex prediction challenge 0.1 (sexpred0.1)"
+    configurationYaml$title <- "Sample sex prediction challenge 0.2 (sexpred0.2)"
 }
 print(x = configurationYaml$title)
 ```
@@ -1082,12 +1082,13 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
             }
         }
         if ( !useFile ) {
-            startingKitRmdFile <- sub(pattern = ".zip", replacement = ".Rmd", x = configurationYaml$phases[[ phase_idx_c ]]$starting_kit)
-            rmarkdown::render(input = startingKitRmdFile, envir = new.env( ) )
-            filesTemp <- c(
-                sub(pattern = ".Rmd", replacement = ".html", x = startingKitRmdFile)
-                , "submission_script.Rmd", "data_train.rds", "data_test.rds"
-            )
+            # startingKitRmdFile <- sub(pattern = ".zip", replacement = ".Rmd", x = configurationYaml$phases[[ phase_idx_c ]]$starting_kit)
+            # rmarkdown::render(input = startingKitRmdFile, envir = new.env( ) )
+            filesTemp <- c("submission_script.R", "data_train.rds", "data_test.rds")
+            # (
+            #     # sub(pattern = ".Rmd", replacement = ".html", x = startingKitRmdFile)
+            #     , "submission_script.R", "data_train.rds", "data_test.rds"
+            # )
             filesTemp <- unique(x = filesTemp)
             files <- readline(prompt = paste("Phase ", phase_idx, " : starting kit : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$starting_kit, "' (format : comma separated filenames) [default : ", paste(filesTemp, collapse = ","), "] : ", sep = "") )
             if ( files == "" ) {

@@ -31,15 +31,10 @@ All key dates and organisation phases of the challenge can be found in the tab `
 
 6. On your local machine, unzip the just downloaded zip file `stating_kit.zip`. 
 The unziped `starting_kit` directory contains :
-- A `starting_kit.html` corresponding to the vignette of the Challenge (all useful information can be found here).
-- A `submission_script.Rmd` to modify and to use to submit your predictions.
-- The public data sets.
+- A `submission_script.R` to modify and to use to submit your predictions.
+- The public data sets (`data_train.rds` and `data_test.rds` files).
 
-7. Then open R in the `starting_kit` directory, (e.g. open `submission_script.Rmd` with RStudio), and launch the following command to generate the baseline submission as a zip file :
-```
-rmarkdown::render("submission_script.Rmd")
-```
-Alternatively you can generate the baseline submission zip file with the Rscript command  : 
+7. Then open R in the `starting_kit` directory, (e.g. open `submission_script.R` with RStudio), and launch the following command to generate the baseline submission as a zip file :
 ```
 Rscript submission_script.R
 ```
