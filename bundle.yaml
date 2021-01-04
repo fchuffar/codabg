@@ -1,9 +1,0 @@
-'': /Users/florent/miniconda2/lib/R/bin/exec/R
-input_directory: /Users/florent/projects/bundle_generation
-loadConfigurationFile: no
-name: bundle
-html_additional_page_number: 0.0
-phase_number: 1.0
-phases_1_external_datasets_number: 0.0
-score_number: 1.0
-average_score_use: no

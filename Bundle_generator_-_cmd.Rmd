@@ -9,6 +9,10 @@ params:
   package_repository: "https://cloud.r-project.org"
 ---
 
+```{r label = "GENERATOR - load config file", include = FALSE}
+source("config")
+```
+
 ```{r label = "GENERATOR - Knitr configuration", include = FALSE}
 #  . echo = FALSE : don't include the source code in the finished file.
 knitr::opts_chunk$set(echo    = FALSE)
@@ -135,7 +139,7 @@ if ( is.null(x = configuration$title) ) {
     configurationYaml$title <- readline(prompt = "Title (format : string) [default = ...] : ")
 }
 if ( configurationYaml$title == "" ) {
-    configurationYaml$title <- "Sample sex prediction challenge 0.2 (sexpred0.2)"
+    configurationYaml$title <- configurationYaml_title
 }
 print(x = configurationYaml$title)
 ```
@@ -146,7 +150,7 @@ if ( is.null(x = configuration$description) ) {
     configurationYaml$description <- readline(prompt = "Description (format : string, max 256 characters) [default = ...] : ")
 }
 if ( configurationYaml$description == "" ) {
-    configurationYaml$description <- "The challenge provides the data.frame `d` of tumoral samples described by sex, age, histology and genes expression values. Some sex status are missing. The goal of the challenge is to use statistical models (e.g. logistic regression) to predict missing sex status using provided gene expression values and clinical attributes."
+    configurationYaml$description <- configurationYaml_description
 }
 print(x = configurationYaml$description)
 ```
