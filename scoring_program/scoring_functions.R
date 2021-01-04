@@ -1,7 +1,13 @@
-## Scoring functions :
-##  - MAE     : the metric to compare 2 vectors or matrices
-##  - compare : the scoring function
-## ========================================================================== ##
+#' The Root Mean Square Error (RMSE)
+#'
+#' @param data_truth a vector or a matrix
+#' @param data_pred a vector or a matrix, with same dimensions as the 'data_truth' parameter
+#' @return the Root Mean Square Error
+RMSE <- function(data_truth, data_pred) {
+    # Incorrect Answers Counts
+    return(sqrt(mean((data_truth - data_pred)^2)))
+}
+
 
 #' The Incorrect Answers Proportion (IAP)
 #'
@@ -13,13 +19,14 @@ IAP <- function(data_truth, data_pred) {
     return( (length(data_truth) - sum(data_truth == data_pred)) / length(data_truth))
 }
 
+
 #' The function to compare 2 vectors or 2 matrices
 #'
 #' @param data_truth a vector or a matrix
 #' @param data_pred a vector or a matrix, with same dimensions as the 'data_truth' parameter
 #' @param metric the name of the function to use as a metric
 #' @return the measure obtain from the metric
-compare <- function(data_truth, data_pred, metric = "IAP") {
+compare <- function(data_truth, data_pred, metric) {
     stopifnot(
         exprs = {
             is.vector(x = data_truth) && is.vector(x = data_pred)

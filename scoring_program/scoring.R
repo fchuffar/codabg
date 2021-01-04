@@ -5,8 +5,6 @@
 ##
 ## ========================================================================== ##
 
-
-
 ## Package dependencies :
 ##  - rmarkdown : generation of details about the results as a html file
 ## ========================================================================== ##
@@ -27,13 +25,14 @@ remove(list = "package")
 ## define input/output from command line args and remove white spaces (should in principle never be changed)
 args <- commandArgs(trailingOnly = TRUE)
 
-## input data directory :
+## input data directory
 input   <- trimws(x = args[ 1 ] )
 ## output directory (where data_preds are written) :
 output  <- trimws(x = args[ 2 ] )
-## scoring program directory :
+## scoring program directory
 program <- trimws(x = args[ 3 ] )
 
+source(paste0(program, "/config.R"))
 source(paste0(program, "/scoring_functions.R"))
 
 ## We display some information for debug purpose :
@@ -73,7 +72,7 @@ scoreFile <- paste0(output, .Platform$file.sep, "scores.txt")
 # stopifnot(exprs = sum( names(x = data_truth) != names(x = data_pred) ) == 0 )
 
 # source("~/projects/bundle_generation/histpred2.0/scoring_program/scoring_functions.R")
-scores <- compare(data_truth=as.vector(data_truth), data_pred=data_pred[,1])
+scores <- compare(data_truth=as.vector(data_truth), data_pred=data_pred[,1], metric=metric)
 # names(x = scores) <- names(x = data_truth)
 
 # print(x = "Scores :")

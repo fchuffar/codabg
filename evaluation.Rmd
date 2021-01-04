@@ -7,14 +7,15 @@ output:
     toc_depth: 2
 ---
 
-The metric used is the Incorrect Answers Proportion (IAP).
-The function IAP computes the proportion of wrong predictions submitted by the participant (`data_pred`) compared to the ground truth (`data_truth`)
+The metric used is the `r metric`.
+
+The function `r metric` is applyed to predictions submitted by the participant (`data_pred`) compared to the ground truth (`data_truth`) using the function `compare` (details below).
 
 ```{r echo=FALSE, results="hide"}
 source("scoring_program/scoring_functions.R")
 ```
 
 ```{r echo=TRUE, results="verbatim"}
-print(IAP)
+print(match.fun(metric))
 print(compare)
 ```

@@ -10,7 +10,10 @@ params:
 ---
 
 ```{r label = "GENERATOR - load config file", include = FALSE}
-source("config")
+config_file = "config_default.R"
+source(config_file)
+file.copy(config_file, "scoring_program/config.R")
+
 ```
 
 ```{r label = "GENERATOR - Knitr configuration", include = FALSE}
@@ -811,7 +814,7 @@ if ( is.na(x = generateData) ) {
     generateData <- TRUE
 }
 if ( generateData ) {
-    rmarkdown::render(input = "generate_data.Rmd", envir = new.env( ) )
+    rmarkdown::render(input=generate_data_rmd_file, envir = new.env( ) )
 } else {
     message <- readline(prompt = "Please, generate all the data sets that are required, and then press 'ENTER'.")
     remove(list = "message")

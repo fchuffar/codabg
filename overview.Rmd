@@ -54,7 +54,7 @@ The command will produce 2 files located in the folder "starting_kit/submissions
 
 9. Check the leaderboard in the tab `Results`.
 
-**Please use the `submission_script.Rmd` contained in the `starting_kit` folder as a template to write, run and submit your code.**
+**Please use the `submission_script.R` contained in the `starting_kit` folder as a template to write, run and submit your code.**
 
 # Public Submissions
 

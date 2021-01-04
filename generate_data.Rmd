@@ -45,7 +45,7 @@ set.seed(seed = as.integer(x = params$seed) )
 
 ```{r label = "Generate data - Generation", echo = FALSE}
 nb_obs = 200
-nb_genes = 100
+nb_genes = 500
 df = data.frame(
   sex=c("M", "F")[round(runif(nb_obs))+1],
   age = round((runif(nb_obs)+1)*40),
