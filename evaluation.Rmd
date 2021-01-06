@@ -15,7 +15,9 @@ The function `r metric` is applyed to predictions submitted by the participant (
 source("scoring_program/scoring_functions.R")
 ```
 
-```{r echo=TRUE, results="verbatim"}
+```{r echo=FALSE, results="verbatim"}
+print(metric)
 print(match.fun(metric))
+print("compare")
 print(compare)
 ```

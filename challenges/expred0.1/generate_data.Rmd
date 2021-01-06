@@ -1,0 +1,100 @@
+---
+title: "Generation of a simulated omic data set for `expred` type challenge"
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+params:
+  package_repository: "https://cloud.r-project.org"
+  install_dependencies: true
+  seed: 1
+---
+
+# Generation of a simulated data set
+
+## Set the random seed
+
+```{r label = "Generate data - Random seed", include = FALSE}
+set.seed(seed = as.integer(x = params$seed) )
+```
+
+## Generation
+
+```{r label = "Generate data - Generation", echo = FALSE}
+nb_obs = 200
+nb_genes = 500
+df = data.frame(
+  sex=c("M", "F")[round(runif(nb_obs))+1],
+  age = round((runif(nb_obs)+1)*40),
+  histology=c("AD", "SC")[round(runif(nb_obs))+1]
+)
+expr = (
+  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * (as.numeric(df$histology) - 1) +
+  matrix(rep(rnorm(nb_genes, 0, 0.5), each=nb_obs), nrow=nb_obs) * (as.numeric(df$sex      ) - 1) +
+  matrix(rep(rnorm(nb_genes, 0, 0.2), each=nb_obs), nrow=nb_obs) * ((df$age>60) +0)               +
+  matrix(rnorm(nb_genes * nb_obs), nrow=nb_obs)
+)
+
+sds = apply(expr, 2, sd)
+expr = t(t(expr) / sds)
+apply(expr, 2, sd)
+
+plot(density(expr[,1]))
+foo = expr[,1]   + 
+  +1*expr[,10]   +
+  -1*expr[,15]   +
+  +2*expr[,20]   +
+  -2*expr[,25]   +
+  +4*expr[,40]   +
+  -4*expr[,45]   +
+0
+  
+expr[,1] = foo/sd(foo)
+# expr[,1] = expr[,10]
+expr = expr - min(expr)
+
+colnames(expr) = paste0("GENE", sprintf(paste0("%0", nchar(nb_genes), "d"), 1:nb_genes))
+df = cbind(df, expr)
+rownames(df) = paste0("OBS", sprintf(paste0("%0", nchar(nb_obs), "d"), 1:nb_obs))
+
+head(df[, 1:10])
+```
+
+## Export
+
+``` {r label="export"}
+data_train = df[1:(nb_obs-100)       , ]
+data_test  = df[(nb_obs-100+1):nb_obs, ]
+
+data_truth = data_test[,"GENE001"]
+names(data_truth) = rownames(data_test)
+print(data_truth)
+
+data_test[1:nrow(data_test),"GENE001"] = NA
+head(data_test[, 1:10])
+dim(data_test)
+print(data_test[,"GENE001"])
+
+head(data_train[, 1:10])
+dim(data_train)
+print(data_train[,"GENE001"])
+
+saveRDS(object = data_train , file = "../../data_train.rds")
+saveRDS(object = data_test  , file = "../../data_test.rds" )
+saveRDS(object = data_truth , file = "../../data_truth.rds")
+```
+
+
+
+
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+

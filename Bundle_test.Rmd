@@ -11,6 +11,14 @@ params:
   seed: 1
 ---
 
+
+# Generate submission using starting kit
+
+```{r label = "Bundle test - Knitr configuration", include = FALSE}
+source(submission_script_R)
+foo = sapply(names(alternative_programs), function (p) {generate_submission_files(alternative_programs[[p]], data_train, data_test, p)})
+```
+
 ```{r label = "Bundle test - Knitr configuration", include = FALSE}
 #  . echo = FALSE : don't include the source code in the finished file.
 knitr::opts_chunk$set(echo    = FALSE)
@@ -107,9 +115,9 @@ Input data :
 - path of the zip file :
 ```{r label = "Bundle test - Input data (zip file)"}
 if ( is.null(x = configuration$input_data) ) {
-    configuration$input_data <- readline(prompt = paste0("Path of the zip file for the input data. (format : absolute or relative path) [default : ", paste0("bundle", .Platform$file.sep, "input_data.zip"), "] : ") )
+    configuration$input_data <- readline(prompt = paste0("Path of the zip file for the input data. (format : absolute or relative path) [default : ", paste0("bundle", .Platform$file.sep, "starting_kit.zip"), "] : ") )
     if ( configuration$input_data == "" ) {
-        configuration$input_data <- paste0("bundle", .Platform$file.sep, "input_data.zip")
+        configuration$input_data <- paste0("bundle", .Platform$file.sep, "starting_kit.zip")
     }
 }
 print(x = configuration$input_data)

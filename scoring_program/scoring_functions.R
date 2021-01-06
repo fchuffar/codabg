@@ -4,7 +4,7 @@
 #' @param data_pred a vector or a matrix, with same dimensions as the 'data_truth' parameter
 #' @return the Root Mean Square Error
 RMSE <- function(data_truth, data_pred) {
-    # Incorrect Answers Counts
+    # Root Mean Square Error
     return(sqrt(mean((data_truth - data_pred)^2)))
 }
 
