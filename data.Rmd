@@ -24,3 +24,8 @@ head(data_test[,c(1:7)])
 dim(data_test)
 ```
 
+```{r}
+if (exists("data_bonus")) {
+  source(data_bonus)
+}
+```

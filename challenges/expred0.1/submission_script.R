@@ -100,6 +100,7 @@ program <- function(data_train, data_test) {
 alternative_programs = list(
   # use SIS model (Zhang HH. J R Stat Soc Series B Stat Methodol. 2008) with lowest p-value
   program_sis = function(data_train, data_test) {
+    ## ALTERNATIVE CODE BEGINS HERE
     genes = colnames(data_train[,-(1:4)])
     ms = sapply(genes, function(g){
       # print(g)
@@ -113,6 +114,24 @@ alternative_programs = list(
     plot(data_train[[g]], data_train$GENE001, xlab=g, main=paste0("GENE001~", g, " R^2=", signif(summary(m)$r.squared,3)))
     abline(m, col=2, lty=2)
     data_pred = predict(m, data_test, type="response")
+    ## ALTERNATIVE CODE ENDS HERE
+    return(data_pred)
+  }, 
+  program_sis2 = function(data_train, data_test) {
+    ## ALTERNATIVE CODE BEGINS HERE
+    genes = colnames(data_train[,-(1:4)])
+    ms = sapply(genes, function(g){
+      # print(g)
+      formula = as.formula(paste0("GENE001~", g))
+      m = lm(formula, data_train)
+      return(summary(m)$r.squared)
+    })
+    gs = names(ms)[rev(order(ms))][1:2]
+    formula = as.formula(paste0("GENE001~", paste0(gs, collapse="+")))
+    m = lm(formula, data_train)
+    pairs(data_train[,c("ALS2", gs)])
+    data_pred = predict(m, data_test, type="response")
+    ## ALTERNATIVE CODE ENDS HERE
     return(data_pred)
   }
 )
@@ -124,7 +143,7 @@ alternative_programs = list(
 
 generate_submission_files = function(program, data_train, data_test, prefix) {
   if (missing(prefix)) {
-    prefix = format(x = Sys.time( ), format = "%Y-%m-%d_%H:%M:%S")
+    prefix = format(x = Sys.time( ), format = "%Y_%m_%d_%H_%M_%S")
   }
   # we use the previously defined function 'program' to estimate A :
   data_pred <- program(

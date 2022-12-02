@@ -29,7 +29,7 @@ All key dates and organisation phases of the challenge can be found in the tab `
 
 5. Download the starting kit containing the public data sets in the tab `Participate`, in the item `Files`.
 
-6. On your local machine, unzip the just downloaded zip file `stating_kit.zip`. 
+6. On your local machine, unzip the just downloaded zip file `starting_kit.zip`. 
 The unziped `starting_kit` directory contains :
 - A `submission_script.R` to modify and to use to submit your predictions.
 - The public data sets (`data_train.rds` and `data_test.rds` files).

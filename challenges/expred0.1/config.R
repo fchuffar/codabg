@@ -4,3 +4,5 @@ metric = "RMSE"
 configurationYaml_leaderboard_columns_score_name_sort = "asc"
 submission_script_R = "challenges/expred0.1/submission_script.R"
 generate_data_rmd_file = "challenges/expred0.1/generate_data.Rmd"
+
+# challenge_dir = "challenges/expred0.1"; system("bash clean.sh"); rmarkdown::render("Bundle_generator_-_cmd.Rmd") ; source(submission_script_R) ; foo = sapply(names(alternative_programs), function (p) {generate_submission_files(alternative_programs[[p]], data_train, data_test, p)})
