@@ -12,6 +12,5 @@ test/
 *.Rhistory
 *.zip
 00_kfold.Rmd
-clean.sh
 .DS_Store
 bundle.yaml
