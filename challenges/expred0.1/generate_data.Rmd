@@ -11,6 +11,7 @@ params:
   seed: 1
 ---
 
+
 # Generation of a simulated data set
 
 ## Set the random seed
@@ -85,16 +86,8 @@ saveRDS(object = data_test  , file = "../../data_test.rds" )
 saveRDS(object = data_truth , file = "../../data_truth.rds")
 ```
 
-
-
-
-
-
 # Session Information
 
 ```{r, results="verbatim"}
 sessionInfo()
 ```
-
-
-

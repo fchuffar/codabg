@@ -1,5 +1,5 @@
 ---
-title: "Codalab bundle generator (command line version)"
+title: "Codalab bundle generator"
 output:
   html_document:
     number_sections: true
@@ -8,14 +8,13 @@ output:
 ---
 
 ```{r label = "GENERATOR - load config file", include = FALSE}
-source("config.R")
-if (!exists("challenge_dir")) {
-  challenge_dir = "."
+if (!exists("challenge_name")) {
+  stop("Need to specify challenge_name")
 }
+challenge_dir = paste0("challenges/", challenge_name)
 config_file = paste0(challenge_dir, "/config.R")
 source(config_file)
 file.copy(config_file, "scoring_program/config.R")
-
 ```
 
 ```{r label = "GENERATOR - Knitr configuration", include = FALSE}
@@ -43,6 +42,9 @@ knitr::opts_chunk$set(cache.comments = FALSE)
 - rmarkdown : to generate the R and html files from Rmd file
 
 ```{r label = "GENERATOR - Package dependencies"}
+readline = function(...) {
+  return("")
+}
 auto_install <- readline(prompt = "Should the dependencies be automatically checked and installed ? (format : TRUE / FALSE) [default = TRUE] : ")
 auto_install <- as.logical(x = auto_install)
 if ( is.na(x = auto_install) ) {

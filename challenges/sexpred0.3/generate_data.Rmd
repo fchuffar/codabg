@@ -1,5 +1,5 @@
 ---
-title: "Generation of a multivariate Gaussian data set"
+title: "Generation of a simulated omic data set for `sexpred` type challenge"
 output:
   html_document:
     number_sections: true
@@ -11,27 +11,6 @@ params:
   seed: 1
 ---
 
-# Package dependencies
-
-- MASS : to simulate a multivariate Gaussian data set.
-
-```{r label = "Generate data - dependencies", include = FALSE}
-if ( params$install_dependencies ) {
-    installed_packages <- installed.packages( )
-    for (package in c("MASS") ) {
-        if ( !{ package %in% installed_packages } ) {
-            print(x = paste("Installation of ", package, sep = "") )
-            install.packages(
-                pkgs = package
-              , repos = params$package_repository
-            )
-        } else {
-            print(x = paste(package, " is installed.", sep = "") )
-        }
-    }
-    remove(list = c("installed_packages", "package") )
-}
-```
 
 # Generation of a simulated data set
 
@@ -85,21 +64,13 @@ head(data_train[, 1:10])
 dim(data_train)
 print(data_train$sex)
 
-saveRDS(object = data_train , file = "data_train.rds")
-saveRDS(object = data_test  , file = "data_test.rds" )
-saveRDS(object = data_truth , file = "data_truth.rds")
+saveRDS(object = data_train , file = "../../data_train.rds")
+saveRDS(object = data_test  , file = "../../data_test.rds" )
+saveRDS(object = data_truth , file = "../../data_truth.rds")
 ```
-
-
-
-
-
 
 # Session Information
 
 ```{r, results="verbatim"}
 sessionInfo()
 ```
-
-
-
