@@ -19,9 +19,3 @@ Test the Codalab bundle
 In a *R* terminal, run the following command :
 `rmarkdown::render(input = "Bundle_test.Rmd", envir = new.env( ) )`
 
-\[WIP\] Render a web site to previsualize the competition
-=========================================================
-
-It gives you the possibility to visualize your competition with a
-minimalist website which looks like the Codalab platform.
-`rmarkdown::render_site(input = "Web_page_generator.Rmd", envir = new.env( ) )`
