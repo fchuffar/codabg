@@ -1,16 +1,10 @@
 ---
 title: "Data"
-output:
-  html_document:
-    number_sections: true
-    toc: true
-    toc_depth: 2
 ---
 
-
 ```{r echo=FALSE, results="hide"}
-data_train = readRDS(file = "data_train.rds")
-data_test = readRDS(file = "data_test.rds")
+data_train = readRDS(file = paste0("challenges/", configuration$name, "/", "data_train.rds"))
+data_test = readRDS(file = paste0("challenges/", configuration$name, "/", "data_test.rds"))
 ```
 
 The file `staring_kit.zip` available to download provides 2 data frames in rds format : 

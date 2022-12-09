@@ -64,9 +64,9 @@ head(data_train[, 1:10])
 dim(data_train)
 print(data_train$sex)
 
-saveRDS(object = data_train , file = "../../data_train.rds")
-saveRDS(object = data_test  , file = "../../data_test.rds" )
-saveRDS(object = data_truth , file = "../../data_truth.rds")
+saveRDS(object = data_train , file = "data_train.rds")
+saveRDS(object = data_test  , file = "data_test.rds" )
+saveRDS(object = data_truth , file = "data_truth.rds")
 ```
 
 # Session Information

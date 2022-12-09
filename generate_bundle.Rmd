@@ -45,81 +45,82 @@ knitr::opts_chunk$set(cache.comments = FALSE)
 readline = function(...) {
   return("")
 }
-auto_install <- readline(prompt = "Should the dependencies be automatically checked and installed ? (format : TRUE / FALSE) [default = TRUE] : ")
-auto_install <- as.logical(x = auto_install)
-if ( is.na(x = auto_install) ) {
-    auto_install <- TRUE
-}
-print(x = auto_install)
-if ( auto_install ) {
-    installed_packages <- installed.packages( )
-    for (package in c("R.utils", "rmarkdown") ) {
-        if ( !{ package %in% installed_packages } ) {
-            print(x = paste("Installation of ", package, sep = "") )
-            install.packages(
-                pkgs = package
-              , repos = params$package_repository
-            )
-        } else {
-            print(x = paste(package, " is installed.", sep = "") )
-        }
-        ## library(
-        ##     package = package
-        ##   , character.only = TRUE
-        ##   , logical.return = TRUE
-        ## )
-    }
-    remove(list = c("installed_packages", "package") )
-}
-remove(list = c("auto_install") )
+# auto_install <- readline(prompt = "Should the dependencies be automatically checked and installed ? (format : TRUE / FALSE) [default = TRUE] : ")
+# auto_install <- as.logical(x = auto_install)
+# if ( is.na(x = auto_install) ) {
+#     auto_install <- TRUE
+# }
+# print(x = auto_install)
+# if ( auto_install ) {
+#     installed_packages <- installed.packages( )
+#     for (package in c("R.utils", "rmarkdown") ) {
+#         if ( !{ package %in% installed_packages } ) {
+#             print(x = paste("Installation of ", package, sep = "") )
+#             install.packages(
+#                 pkgs = package
+#               , repos = params$package_repository
+#             )
+#         } else {
+#             print(x = paste(package, " is installed.", sep = "") )
+#         }
+#         ## library(
+#         ##     package = package
+#         ##   , character.only = TRUE
+#         ##   , logical.return = TRUE
+#         ## )
+#     }
+#     remove(list = c("installed_packages", "package") )
+# }
+# remove(list = c("auto_install") )
 ```
    
 # Script options
 
 ```{r label = "GENERATOR - Command line arguments", include = FALSE}
 # User variables :
-configuration <- R.utils::commandArgs(
-    trailingOnly = FALSE
-  , asValues     = TRUE
-  , unique       = TRUE
-)
+configuration = list()
+# <- R.utils::commandArgs(
+#     trailingOnly = FALSE
+#   , asValues     = TRUE
+#   , unique       = TRUE
+# )
 configurationYaml = list(competition_docker_image="fchuffar/codalabio")
 ```
 
 Path of the directory with the files to create the challenge : string between double quotes (preferably without white space). The working directory of R will then be set to this directory.
 ```{r label = "GENERATOR - Directory input"}
-if ( is.null(x = configuration$input_directory) ) {
-    configuration$input_directory <- readline(prompt = paste0("Path of the directory with the files to create the challenge. The working directory of R will then be set to this directory. (format : absolute or relative path) [default : ", getwd( ), "] : ") )
-    if ( configuration$input_directory == "" ) {
-        configuration$input_directory <- getwd( )
-    }
-}
-print(x = configuration$input_directory)
-if ( !dir.exists(paths = configuration$input_directory) ) {
-    dir.create(path = configuration$input_directory)
-}
-setwd(dir = configuration$input_directory)
+# if ( is.null(x = configuration$input_directory) ) {
+#     configuration$input_directory <- readline(prompt = paste0("Path of the directory with the files to create the challenge. The working directory of R will then be set to this directory. (format : absolute or relative path) [default : ", getwd( ), "] : ") )
+#     if ( configuration$input_directory == "" ) {
+#         configuration$input_directory <- getwd( )
+#     }
+# }
+# print(x = configuration$input_directory)
+# if ( !dir.exists(paths = configuration$input_directory) ) {
+#     dir.create(path = configuration$input_directory)
+# }
+# setwd(dir = configuration$input_directory)
 ```
 
 Load existing configuration file : TRUE / FALSE. If TRUE, it will load `configuration.rds` file.
 ```{r label = "GENERATOR - Load existing configuration file"}
-if ( is.null(x = configuration$loadConfigurationFile) ) {
-    configuration$loadConfigurationFile <- readline(prompt = "Load existing configuration file (format : TRUE / FALSE) [default : FALSE] : ")
-    configuration$loadConfigurationFile <- as.logical(x = configuration$loadConfigurationFile)
-    if ( is.na(x = configuration$loadConfigurationFile) ) {
-        configuration$loadConfigurationFile <- FALSE
-    }
-}
-print(x = configuration$loadConfigurationFile)
-if ( configuration$loadConfigurationFile ) {
-    configurationFile <- "configuration.rds"
-    if ( file.exists( configurationFile ) ) {
-        configuration <- readRDS(file = configurationFile)
-    } else {
-        print(x = "WARNING : the configuration file 'configuration.rds' doesn't exist.")
-    }
-    remove(list = configurationFile)
-}
+# if ( is.null(x = configuration$loadConfigurationFile) ) {
+#     configuration$loadConfigurationFile <- readline(prompt = "Load existing configuration file (format : TRUE / FALSE) [default : FALSE] : ")
+#     configuration$loadConfigurationFile <- as.logical(x = configuration$loadConfigurationFile)
+#     if ( is.na(x = configuration$loadConfigurationFile) ) {
+#         configuration$loadConfigurationFile <- FALSE
+#     }
+# }
+# print(x = configuration$loadConfigurationFile)
+# if ( configuration$loadConfigurationFile ) {
+#     configurationFile <- "configuration.rds"
+#     if ( file.exists( configurationFile ) ) {
+#         configuration <- readRDS(file = configurationFile)
+#     } else {
+#         print(x = "WARNING : the configuration file 'configuration.rds' doesn't exist.")
+#     }
+#     remove(list = configurationFile)
+# }
 ```
     
 Name of the directory to save the challenge : string between double quotes whitout white space
@@ -127,7 +128,7 @@ Name of the directory to save the challenge : string between double quotes whito
 if ( is.null(x = configuration$name) ) {
     configuration$name <- readline(prompt = "Name of the challenge (format : string) [default : bundle] : ")
     if ( configuration$name == "" ) {
-        configuration$name <- "bundle"
+        configuration$name <- challenge_name
     }
 }
 print(x = configuration$name)
@@ -623,8 +624,8 @@ Phase 1 is the only phase of this challenge."
       remove(list = "phase_idx_c")
   }
 
-  ## Save of the configuration file :
-  saveRDS(object = configuration, file = "configuration.rds")
+  # ## Save of the configuration file :
+  # saveRDS(object = configuration, file = "configuration.rds")
 ```
 
 ## Some phase properties cannot be specified in the YAML file. However, they are available from the editor:
@@ -854,7 +855,8 @@ if ( useRmd ) {
     rmarkdown::render(
                    input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$overview)
                  , output_dir = configuration$name
-                 , quiet = TRUE
+                 , quiet = TRUE, 
+                 output_format="html_document"
                  , envir = new.env( )
                )
 } else {
@@ -883,7 +885,8 @@ if ( useRmd ) {
     rmarkdown::render(
                    input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$evaluation)
                  , output_dir = configuration$name
-                 , quiet = TRUE
+                 , quiet = TRUE, 
+                 output_format="html_document"
                  , envir = new.env( )
                  , knit_root_dir = getwd()
                )
@@ -912,7 +915,8 @@ if ( useRmd ) {
     rmarkdown::render(
                    input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$terms)
                  , output_dir = configuration$name
-                 , quiet = TRUE
+                 , quiet = TRUE, 
+                 output_format="html_document"
                  , envir = new.env( )
                )
 } else {
@@ -940,8 +944,8 @@ if ( useRmd ) {
     rmarkdown::render(
                    input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$data)
                  , output_dir = configuration$name
-                 , quiet = TRUE
-                 , envir = new.env( )
+                 , quiet = TRUE, 
+                 output_format="html_document"
                )
 } else {
     message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$data, "' associated to the tab 'Data'. Then press 'ENTER'.", sep = "") )
@@ -972,7 +976,8 @@ for ( additional_page_idx in seq_len(length.out = configuration$html_additional_
         rmarkdown::render(
                        input = sub(pattern = ".html", replacement = ".Rmd", x = html_additional_page_idx_path)
                  , output_dir = configuration$name
-                 , quiet = TRUE
+                 , quiet = TRUE, 
+                 output_format="html_document"
                  , envir = new.env( )
                )
     } else {
@@ -1067,7 +1072,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
     if ( !useFile ) {
         files <- readline(prompt = paste("Phase ", phase_idx, " : reference data : files to add inside the zip file '", configurationYaml$phases[[ phase_idx_c ]]$reference_data, "' (format : comma separated filenames) [default : data_truth.rds] : ", sep = "") )
         if ( files == "" ) {
-            files <- "data_truth.rds"
+            files <- paste0("challenges/", configuration$name, "/", "data_truth.rds")
         }
         files <- unlist(x = strsplit(x = files, split = ",") )
         zip::zipr(
@@ -1095,7 +1100,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
         if ( !useFile ) {
             # startingKitRmdFile <- sub(pattern = ".zip", replacement = ".Rmd", x = configurationYaml$phases[[ phase_idx_c ]]$starting_kit)
             # rmarkdown::render(input = startingKitRmdFile, envir = new.env( ) )
-            filesTemp <- c(submission_script_R, "data_train.rds", "data_test.rds")
+            filesTemp <- c(submission_script_R, paste0("challenges/", configuration$name, "/", c("data_train.rds", "data_test.rds")))
             # (
             #     # sub(pattern = ".Rmd", replacement = ".html", x = startingKitRmdFile)
             #     , "submission_script.R", "data_train.rds", "data_test.rds"
@@ -1216,6 +1221,7 @@ bundleFiles <- c(
 bundleFiles <- sub(pattern = "~", replacement = "", x = bundleFiles)
 bundleFiles <- unique(x = bundleFiles)
 bundlePath  <- paste(configuration$name, .Platform$file.sep, "bundle.zip", sep = "")
+# bundlePath  <- paste("challenges/", configuration$name, "/bundle.zip", sep = "")
 
 file.copy(
     from      = configurationYaml$image
@@ -1228,15 +1234,22 @@ zip::zipr(
   , files   = paste(configuration$name, .Platform$file.sep, bundleFiles, sep = "")
 )
 
+file.copy(
+    from      = paste0(configuration$name, "/bundle.zip")
+  , to        = paste0("challenges/", configuration$name, "/bundle.zip")
+  , overwrite = TRUE
+)
+
+
 for ( file in utils::unzip(bundlePath, list = TRUE)$Name ) {
     cat( paste("  |-> ", file, "\n", sep = "") )
 }
-remove(list = c("bundleFiles", "bundlePath", "file") )
-
-save(
-    list = c("configuration", "configurationYaml")
-  , file = "save.RData"
-)
+# remove(list = c("bundleFiles", "bundlePath", "file") )
+#
+# save(
+#     list = c("configuration", "configurationYaml")
+#   , file = "save.RData"
+# )
 ```
 
 # Session Information

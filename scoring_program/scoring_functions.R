@@ -15,7 +15,7 @@ RMSE <- function(data_truth, data_pred) {
 #' @param data_pred a vector or a matrix, with same dimensions as the 'data_truth' parameter
 #' @return the Incorrect Answers Proportion
 IAP <- function(data_truth, data_pred) {
-    # Incorrect Answers Counts
+    # Incorrect Answers Proportion
     return( (length(data_truth) - sum(data_truth == data_pred)) / length(data_truth))
 }
 

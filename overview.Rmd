@@ -1,23 +1,18 @@
 ---
 title: "Overview"
-output:
-  html_document:
-    number_sections: true
-    toc: true
-    toc_depth: 2
 ---
 
-# Challenge
+## Challenge
 
 ```{r, results="asis"}
 cat(configurationYaml$description)
 ```
 
-# Important Dates
+## Important Dates
 
 All key dates and organisation phases of the challenge can be found in the tab `Phases`: competition start, competition end, number of phases... 
 
-# Get started
+## Get started
 
 1. Create an account on the codalab platform.
 
@@ -45,6 +40,7 @@ Alternatively you can generate the baseline submission zip file with the Rscript
 ```
 Rscript submission_script.R
 ```
+
 The command will produce 2 files located in the folder "starting_kit/submissions"
 -results_XXX_XX_XX-XX.zip
 -program_XXX_XX_XX-XX.zip
@@ -64,7 +60,7 @@ By clicking on the blue cross at the right of your submission, you have addition
 
 You can access to all the public submissions of the competition in the tab `Public Submissions`.
 
-# Forum
+## Forum
 
 If enable, you can access to the internal forum in the tab `Forums`.
 
