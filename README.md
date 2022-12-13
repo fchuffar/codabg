@@ -9,7 +9,7 @@ Generate a Codalab bundle
 In a *R* terminal, run the following command :
 ```
 system("bash clean.sh") ;  
-challenge_name="epismoke1.0"; 
+challenge_name="sexpred0.3"; 
 rmarkdown::render("generate_bundle.Rmd")
 ```
 
