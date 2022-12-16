@@ -129,7 +129,7 @@ alternative_programs = list(
     gs = names(ms)[rev(order(ms))][1:2]
     formula = as.formula(paste0("GENE001~", paste0(gs, collapse="+")))
     m = lm(formula, data_train)
-    pairs(data_train[,c("ALS2", gs)])
+    pairs(data_train[,c("GENE001", gs)])
     data_pred = predict(m, data_test, type="response")
     ## ALTERNATIVE CODE ENDS HERE
     return(data_pred)

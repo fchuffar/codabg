@@ -5,17 +5,19 @@ output:
     number_sections: true
     toc: true
     toc_depth: 2
-params:
-  package_repository: "https://cloud.r-project.org"
-  install_dependencies: true
-  seed: 1
 ---
 
 
+```{r}
+if (!exists("challenge_name")) {
+  stop("Need to specify challenge_name")
+}
+```
+
 # Generate submission using starting kit
 
-```{r label = "Bundle test - Knitr configuration", include = FALSE}
-source(submission_script_R)
+```{r "alternative_programs", include = FALSE}
+source(submission_script_R, chdir=TRUE)
 foo = sapply(names(alternative_programs), function (p) {generate_submission_files(alternative_programs[[p]], data_train, data_test, p)})
 ```
 
@@ -115,9 +117,9 @@ Input data :
 - path of the zip file :
 ```{r label = "Bundle test - Input data (zip file)"}
 if ( is.null(x = configuration$input_data) ) {
-    configuration$input_data <- readline(prompt = paste0("Path of the zip file for the input data. (format : absolute or relative path) [default : ", paste0("bundle", .Platform$file.sep, "starting_kit.zip"), "] : ") )
+    configuration$input_data <- readline(prompt = paste0("Path of the zip file for the input data. (format : absolute or relative path) [default : ", paste0(challenge_name, .Platform$file.sep, "starting_kit.zip"), "] : ") )
     if ( configuration$input_data == "" ) {
-        configuration$input_data <- paste0("bundle", .Platform$file.sep, "starting_kit.zip")
+        configuration$input_data <- paste0(challenge_name, .Platform$file.sep, "starting_kit.zip")
     }
 }
 print(x = configuration$input_data)
@@ -137,9 +139,9 @@ Reference data :
 - path of the zip file :
 ```{r label = "Bundle test - Reference data (zip file)"}
 if ( is.null(x = configuration$reference_data) ) {
-    configuration$reference_data <- readline(prompt = paste0("Path of the zip file for the reference data. (format : absolute or relative path) [default : ", paste0("bundle", .Platform$file.sep, "reference_data.zip"), "] : ") )
+    configuration$reference_data <- readline(prompt = paste0("Path of the zip file for the reference data. (format : absolute or relative path) [default : ", paste0(challenge_name, .Platform$file.sep, "reference_data.zip"), "] : ") )
     if ( configuration$reference_data == "" ) {
-        configuration$reference_data <- paste0("bundle", .Platform$file.sep, "reference_data.zip")
+        configuration$reference_data <- paste0(challenge_name, .Platform$file.sep, "reference_data.zip")
     }
 }
 print(x = configuration$reference_data)

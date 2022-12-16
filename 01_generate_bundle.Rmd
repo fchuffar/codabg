@@ -7,6 +7,12 @@ output:
     toc_depth: 2
 ---
 
+```{r md4codabench_html4codalab}
+page_extension = ".html"
+output_format="html_document"
+if (!exists("GENERATE_DATA")) {GENERATE_DATA = TRUE}
+```
+
 ```{r label = "GENERATOR - load config file", include = FALSE}
 if (!exists("challenge_name")) {
   stop("Need to specify challenge_name")
@@ -170,7 +176,7 @@ if ( is.null(x = configuration$disallow_leaderboard_modifying) ) {
 }
 configurationYaml$disallow_leaderboard_modifying <- as.logical(x = configurationYaml$disallow_leaderboard_modifying)
 if ( is.na(x = configurationYaml$disallow_leaderboard_modifying) ) {
-    configurationYaml$disallow_leaderboard_modifying <- TRUE
+    configurationYaml$disallow_leaderboard_modifying <- FALSE
 }
 print(x = configurationYaml$disallow_leaderboard_modifying)
 ```
@@ -182,7 +188,7 @@ if ( is.null(x = configuration$force_submission_to_leaderboard) ) {
 }
 configurationYaml$force_submission_to_leaderboard <- as.logical(x = configurationYaml$force_submission_to_leaderboard)
 if ( is.na(x = configurationYaml$force_submission_to_leaderboard) ) {
-    configurationYaml$force_submission_to_leaderboard <- TRUE
+    configurationYaml$force_submission_to_leaderboard <- FALSE
 }
 print(x = configurationYaml$force_submission_to_leaderboard)
 ```
@@ -271,7 +277,7 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$overview <- readline(prompt = "Html file : overview (format : filename with html extension) [default = overview.html] : ")
   }
   if ( configurationYaml$html$overview == "" ) {
-      configurationYaml$html$overview <- "overview.html"
+      configurationYaml$html$overview <- paste0("overview", page_extension)
   }
   print(x = configurationYaml$html$overview)
 ```
@@ -282,7 +288,7 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$evaluation <- readline(prompt = "Html file : evaluation (format : filename with html extension) [default = evaluation.html] : ")
   }
   if ( configurationYaml$html$evaluation == "" ) {
-      configurationYaml$html$evaluation <- "evaluation.html"
+      configurationYaml$html$evaluation <- paste0("evaluation", page_extension)
   }
   print(x = configurationYaml$html$evaluation)
 ```
@@ -293,7 +299,7 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$terms <- readline(prompt = "Html file : terms and conditions (format : filename with html extension) [default = terms_and_conditions.html] : ")
   }
   if ( configurationYaml$html$terms == "" ) {
-      configurationYaml$html$terms <- "terms_and_conditions.html"
+      configurationYaml$html$terms <- paste0("terms_and_conditions", page_extension)
   }
   print(x = configurationYaml$html$terms)
 ```
@@ -304,7 +310,7 @@ print(x = configurationYaml$admin_names)
       configurationYaml$html$data <- readline(prompt = "Html file : data (format : filename with html extension) [default = data.html] : ")
   }
   if ( configurationYaml$html$data == "" ) {
-      configurationYaml$html$data <- "data.html"
+      configurationYaml$html$data <- paste0("data", page_extension)
   }
   print(x = configurationYaml$html$data)
 ```
@@ -340,7 +346,7 @@ print(x = configurationYaml$admin_names)
           configuration[[ html_additional_page_idx_path ]] <- readline(prompt = paste("Filename (format : string) [default = additional_html_page ", html_additional_page_idx, ".html] : ") )
       }
       if ( configuration[[ html_additional_page_idx_path ]] == "" ) {
-          configuration[[ html_additional_page_idx_path ]] <- paste("additional_html_page ", html_additional_page_idx, ".html", sep = "")
+          configuration[[ html_additional_page_idx_path ]] <- paste("additional_html_page ", html_additional_page_idx, page_extension, sep = "")
       }
       print(x = configuration[[ html_additional_page_idx_path ]])
 
@@ -613,10 +619,7 @@ Phase 1 is the only phase of this challenge."
       if ( is.null(x = configuration[[ paste("phases", phase_idx, "force_best_submission_to_leaderboard", sep = "_" ) ]] ) ) {
           configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- readline(prompt = "Force best submission to leaderboard (format : TRUE / FALSE) [default : TRUE] : ")
       }
-      configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- as.logical(x = configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard)
-      if ( is.na(x = configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard) ) {
-          configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- TRUE
-      }
+      configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard <- TRUE
       print(x = configurationYaml$phases[[ phase_idx_c ]]$force_best_submission_to_leaderboard)
       
       print(x = "")
@@ -813,18 +816,9 @@ yaml::write_yaml(
 # Generation of the dataset
 
 ```{r label = "GENERATOR - Generation datasets", include = FALSE}
-generateData <- readline(prompt = paste("Generation of : ", configurationYaml$html$data, " : should we simulate the data and the associated rds files ? (format : TRUE / FALSE) [default = TRUE] : ", sep = "") )
-generateData <- as.logical(x = generateData)
-if ( is.na(x = generateData) ) {
-    generateData <- TRUE
-}
-if ( generateData ) {
+if (GENERATE_DATA) {
     rmarkdown::render(input=generate_data_rmd_file, envir=new.env(), output_dir="./", intermediates_dir="./", knit_root_dir="./" )
-} else {
-    message <- readline(prompt = "Please, generate all the data sets that are required, and then press 'ENTER'.")
-    remove(list = "message")
 }
-remove(list = "generateData")
 ```
 
 # Generation of the scoring program (and optionally of the ingestion program)
@@ -853,10 +847,10 @@ if ( is.na(x = useRmd) ) {
 }
 if ( useRmd ) {
     rmarkdown::render(
-                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$overview)
+                   input = sub(pattern = page_extension, replacement = ".Rmd", x = configurationYaml$html$overview)
                  , output_dir = configuration$name
                  , quiet = TRUE, 
-                 output_format="html_document"
+                 output_format=output_format
                  , envir = new.env( )
                )
 } else {
@@ -883,10 +877,10 @@ if ( is.na(x = useRmd) ) {
 }
 if ( useRmd ) {
     rmarkdown::render(
-                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$evaluation)
+                   input = sub(pattern = page_extension, replacement = ".Rmd", x = configurationYaml$html$evaluation)
                  , output_dir = configuration$name
                  , quiet = TRUE, 
-                 output_format="html_document"
+                 output_format=output_format
                  , envir = new.env( )
                  , knit_root_dir = getwd()
                )
@@ -913,10 +907,10 @@ if ( is.na(x = useRmd) ) {
 }
 if ( useRmd ) {
     rmarkdown::render(
-                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$terms)
+                   input = sub(pattern = page_extension, replacement = ".Rmd", x = configurationYaml$html$terms)
                  , output_dir = configuration$name
                  , quiet = TRUE, 
-                 output_format="html_document"
+                 output_format=output_format
                  , envir = new.env( )
                )
 } else {
@@ -942,10 +936,10 @@ if ( is.na(x = useRmd) ) {
 }
 if ( useRmd ) {
     rmarkdown::render(
-                   input = sub(pattern = ".html", replacement = ".Rmd", x = configurationYaml$html$data)
+                   input = sub(pattern = page_extension, replacement = ".Rmd", x = configurationYaml$html$data)
                  , output_dir = configuration$name
                  , quiet = TRUE, 
-                 output_format="html_document"
+                 output_format=output_format
                )
 } else {
     message <- readline(prompt = paste("Please, generate in the current directory the file '", configurationYaml$html$data, "' associated to the tab 'Data'. Then press 'ENTER'.", sep = "") )
@@ -974,10 +968,10 @@ for ( additional_page_idx in seq_len(length.out = configuration$html_additional_
     }
     if ( useRmd ) {
         rmarkdown::render(
-                       input = sub(pattern = ".html", replacement = ".Rmd", x = html_additional_page_idx_path)
+                       input = sub(pattern = page_extension, replacement = ".Rmd", x = html_additional_page_idx_path)
                  , output_dir = configuration$name
                  , quiet = TRUE, 
-                 output_format="html_document"
+                 output_format=output_format
                  , envir = new.env( )
                )
     } else {
@@ -1102,7 +1096,7 @@ for ( phase_idx in seq_len(length.out = configuration$phase_number ) ) {
             # rmarkdown::render(input = startingKitRmdFile, envir = new.env( ) )
             filesTemp <- c(submission_script_R, paste0("challenges/", configuration$name, "/", c("data_train.rds", "data_test.rds")))
             # (
-            #     # sub(pattern = ".Rmd", replacement = ".html", x = startingKitRmdFile)
+            #     # sub(pattern = ".Rmd", replacement = page_extension, x = startingKitRmdFile)
             #     , "submission_script.R", "data_train.rds", "data_test.rds"
             # )
             filesTemp <- unique(x = filesTemp)
