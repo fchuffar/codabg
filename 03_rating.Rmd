@@ -1,0 +1,287 @@
+---
+title: "`epismoke1.0`"
+subtitle: "Notation"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim")
+``` 
+
+# Result scores
+
+## Raw scores
+
+```{r loading_data, echo=FALSE, results="verbatim"}
+zip_files = list.files("leaderboard_dec2022", pattern="*output.zip", full.names=TRUE)
+scores = sapply(zip_files, function(f){
+  zipped_files = unzip(f)
+  if (!file.exists("scores.txt")) {
+    stop("no score file")      
+  }
+  res = read.table("scores.txt")[[2]]
+  file.remove(zipped_files)
+  return(res)
+})
+names(scores) = do.call(rbind, strsplit(names(scores), " -|/"))[,2]
+scores = sort(scores)
+scores
+den = density(scores, bw=0.005) 
+plot(den, main="raw scores")
+abline(v=scores, col=adjustcolor(1, alpha.f=.4), lwd=2)
+lines(den, col=2, lwd=3)
+```
+
+
+## Mark model
+
+```{r, fig.width=12, fig.height=4}
+notemin = c(.63,  8)
+noteme1 = c(.59, 10)
+notemax = c(.33, 16)
+
+sim_scores = seq(from=notemin[1], to=notemax[1], length.out=100)
+
+lower_marks = sim_scores[sim_scores>noteme1[1]]
+lower_marks = -lower_marks
+lower_marks = -(lower_marks + noteme1[1])/ (min(lower_marks) + noteme1[1])
+lower_marks = lower_marks * (noteme1[2] - notemin[2])  + noteme1[2]
+lower_marks
+
+upper_marks = sim_scores[sim_scores<=noteme1[1]]
+upper_marks = -upper_marks
+upper_marks = -(upper_marks - max(upper_marks)) / (-noteme1[1] - max(upper_marks))
+upper_marks = upper_marks * (notemax[2] - noteme1[2]) + notemax[2]
+upper_marks
+
+raw_marks = c(lower_marks, upper_marks)
+layout(matrix(1:2, 1), respect=TRUE)
+plot(sim_scores, raw_marks)
+```
+
+## Marks
+
+```{r, fig.width=12, fig.height=4}
+lower_marks = scores[scores>noteme1[1]]
+lower_marks = -lower_marks
+lower_marks = -(lower_marks + noteme1[1])/ (min(lower_marks) + noteme1[1])
+lower_marks = lower_marks * (noteme1[2] - notemin[2])  + noteme1[2]
+lower_marks
+
+upper_marks = scores[scores<=noteme1[1]]
+upper_marks = -upper_marks
+upper_marks = -(upper_marks - max(upper_marks)) / (-noteme1[1] - max(upper_marks))
+upper_marks = upper_marks * (notemax[2] - noteme1[2]) + notemax[2]
+upper_marks
+
+raw_marks = c(upper_marks, lower_marks)
+round_marks = floor(raw_marks*2)/2
+
+layout(matrix(1:3, 1), respect=TRUE)
+plot(scores, raw_marks, pch=16, col=adjustcolor(2, alpha.f=.4), cex=2)
+plot(scores, round_marks, pch=16, col=adjustcolor(2, alpha.f=.4), cex=2)
+plot(raw_marks, round_marks, pch=16, col=adjustcolor(2, alpha.f=.4), cex=2)
+```
+
+```{r echo=FALSE, results="verbatim"}
+marks = data.frame(score=scores, raw_mark=raw_marks, round_mark=round_marks)
+marks
+```
+
+
+# Program scores
+
+
+## Initial dataset
+
+```{r program_score, echo=FALSE, results="hide", warning=FALSE}
+png()
+zip_files = list.files("leaderboard_dec2022", pattern="*submission.zip", full.names=TRUE)
+names(zip_files) = do.call(rbind, strsplit(zip_files, " -|/"))[,2]
+dir.create("programs", showWarnings=FALSE)
+programs = lapply(names(zip_files), function(n){
+  dest_file = paste0("programs/program_", n, ".R")
+  if (!file.exists(dest_file)) {
+    if (file.exists("program.R")) {
+      file.remove("program.R")
+    }
+    f = zip_files[[n]]
+    zipped_files = unzip(f)
+    if (file.exists("program.R")) {
+      file.copy("program.R" , dest_file)      
+    }
+    file.remove(zipped_files)
+  }
+  if (file.exists(dest_file)) {
+    source(dest_file)
+    p = program
+  } else {
+    print(paste0("No program for ", f))
+    p = NA
+  }
+})
+names(programs) = names(zip_files)
+programs
+sum(is.na(programs))
+sum(!is.na(programs))
+
+programs = programs[!is.na(programs)]
+
+
+
+# programs = programs[!names(programs) %in% c("Thibault", "rochamar")]
+
+
+data_train = readRDS(file = "../../data_train.rds")
+data_test  = readRDS(file = "../../data_test.rds")
+data_truth = as.character(readRDS(file = "../../data_truth.rds"))
+data_alter = readRDS(file = "../../data_alter.rds")
+
+
+# idx = c(
+#   #               #  exec_time resscore orig_prgscore
+#   # "alice.chevaux",# 53.9953266    0.465         0.465
+#   # "chauveth"     ,#131.1355496    0.275         0.275
+#   # "combesj"      ,#230.8145216    0.280         0.280
+#   "FlorentC"     ,# 14.1049744    0.425         0.425
+#   # "ilias"        ,#132.2847916    0.275         0.275
+#   # "JingyangQUAN" ,# 13.8479943    0.375         0.375
+#   # "Juless"       ,#103.1742588    0.280         0.280
+#   "Morgane"      ,#  0.7059697    0.370         0.370
+#   "Oceane_B"     ,#  0.7320839    0.370         0.370
+#   # "pappoune"     ,#262.4266654    0.280         0.280
+#   # "Rjeschni"     ,# 62.5504685    0.350         0.330
+#   # "rochamar"     ,# 31.4184917    0.330         0.330
+#   # "Thibault"     , # 11.1453433    0.400         0.400
+#   "alice_cha"    #  0.6759743    0.370         0.370
+# )
+#
+# programs = programs[idx]
+
+
+install.packages = function(...){print("disabling install.packages"); NULL}
+source("../../../../scoring_program/scoring_functions.R")
+progscores = sapply(names(programs), function(user) {
+  print(user)
+  p = programs[[user]]
+  exec_time = microbenchmark::microbenchmark(data_pred <<- p(data_train, data_test), times=1, unit='s')$time/(10^9)
+  if (is.matrix(data_pred) | is.data.frame(data_pred)) {
+    data_pred = data_pred[,1]
+  }
+  error = compare(data_truth=data_truth, data_pred=data_pred, metric="IAP")  
+  ret = c(exec_time=exec_time, resscore=scores[[user]], orig_prgscore=error)
+  print(ret)
+  return(ret)  
+})
+progscores = data.frame(t(progscores))
+dev.off()
+```
+
+```{r progscores, echo=FALSE, results="verbatim"}
+progscores[order(progscores[,1]),]
+```
+
+
+## New dataset
+
+```{r progscores_new, echo=FALSE, results="hide", warning=FALSE}
+png()
+for (i in 1:length(data_alter)) {
+  data_train = data_alter[[i]]$data_train
+  data_test  = data_alter[[i]]$data_test
+  data_truth = as.character(data_alter[[i]]$data_test[,1])
+
+  progscores2 = sapply(names(programs), function(user) {
+    print(user)
+    p = programs[[user]]
+    data_pred = try(p(data_train, data_test))
+    if (!is.null(attributes(data_pred)$class)) {
+      if (attributes(data_pred)$class == "try-error") {
+        print("error on data_pred")
+        error = 1.1*max(progscores[,1])
+        return(error)
+      }
+    }
+    if (is.matrix(data_pred) | is.data.frame(data_pred)) {
+      data_pred = data_pred[,1]
+    }
+    error = compare(data_truth=data_truth, data_pred=data_pred, metric="IAP")      
+    print(error)
+    return(error)
+  })
+  progscores[[paste0("new", i, "_prgscore")]] = progscores2[rownames(progscores)]
+}
+progscores = progscores[order(progscores[,ncol(progscores)]),]
+dev.off()
+```
+
+```{r, echo=FALSE, results="verbatim"}
+progscores
+```
+
+```{r progscores_new_plot, echo=FALSE, results="hide", fig.width=12}
+progscores = progscores[,-1]
+# stop("EFN")
+progscores$rank = (1:nrow(progscores))-1
+progscores$rank = progscores$rank / max(progscores$rank)
+progscores$rank = progscores$rank * diff(range(progscores[[paste0("new2_prgscore")]])) + min(progscores[[paste0("new2_prgscore")]])
+progscores$rank2 = progscores$rank
+progscores
+
+layout(matrix(1:2,1), respect=TRUE)
+matplot(t(as.matrix(progscores)), type="l", pch=1)
+text(ncol(progscores)-.5, progscores$rank, rownames(progscores), pos=3)
+
+
+# progscores = progscores[progscores[[paste0("new2_prgscore")]]<.3,]
+# progscores$rank = (1:nrow(progscores))-1
+# progscores$rank = progscores$rank / max(progscores$rank)
+# progscores$rank = progscores$rank * diff(range(progscores[,1:5])) + min(progscores[,1:5])
+# progscores$rank2 = progscores$rank
+# progscores
+
+matplot(t(as.matrix(progscores)), ylim=range(progscores[,1:(ncol(progscores)-2)]), type="b", pch=1)
+text(ncol(progscores)-.5, progscores$rank, rownames(progscores), pos=3)
+
+marks$bonus = 0
+marks[rownames(progscores),]$bonus = 4
+marks
+saveRDS(marks, "marks.rds")
+```
+
+```{r}
+data = as.matrix(t(progscores[,3:(ncol(progscores)-2)])) 
+data = data - apply(data, 1, mean) 
+data = data / apply(data, 1, sd) 
+foo = lapply(colnames(data), function(cn) {
+  data.frame(names=cn, score = data[,cn])
+})
+foo = do.call(rbind, foo)
+foo$names = factor(foo$name, levels=names(sort(apply(data, 2, mean) )))
+boxplot(foo$score~foo$names, las=2, xlab="", ylab="z")
+```
+
+# Final marks
+
+```{r echo=FALSE, results="verbatim"}
+marks
+```
+
+
+# Information de session
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+

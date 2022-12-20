@@ -1249,5 +1249,5 @@ for ( file in utils::unzip(bundlePath, list = TRUE)$Name ) {
 # Session Information
 
 ```{r label = "GENERATOR - Session information", results="verbatim"}
-     print(x = sessionInfo(), RNG = TRUE, locale = TRUE)
+print(x = sessionInfo(), RNG = TRUE, locale = TRUE)
 ```

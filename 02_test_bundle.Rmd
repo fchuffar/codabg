@@ -326,3 +326,10 @@ system(command = scoring_command)
 print(x = list.files(path = output) )
 remove(list = c("input", "output") )
 ```
+
+
+# Session Information
+
+```{r label = "GENERATOR - Session information", results="verbatim"}
+print(x = sessionInfo(), RNG = TRUE, locale = TRUE)
+```
