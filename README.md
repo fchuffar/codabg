@@ -14,7 +14,7 @@ challenge_name="sexpred0.3";
 rmarkdown::render("01_generate_bundle.Rmd")
 ```
 
-# Test the Codalab bundle
+## Test the Codalab bundle
 
 In a *R* terminal, run the following command :
 `rmarkdown::render(input = "02_test_bundle.Rmd", envir = new.env( ) )`
