@@ -1,0 +1,413 @@
+---
+title: "Generation of a DNA methylation dataset for `smoking_status` prediction"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=TRUE, results="verbatim")
+```
+
+# Loading data
+
+```{r loading_data}
+print("Load and format data")
+if (!exists("mreadRDS")) {mreadRDS = memoise::memoise(readRDS, cache=cachem::cache_mem(max_size = 10*1024 * 1024^2)) }
+df = mreadRDS("df_preproc_GSE42861.rds")
+
+idx_samples = rownames(df)
+markers_start = grep("cg",colnames(df))[1]
+idx_clinicals = colnames(df)[1:(markers_start-1)]
+idx_cpg = colnames(df)[markers_start:ncol(df)]
+
+head(df[,idx_clinicals])
+table(df$smoking_status)
+df = df[df$smoking_status %in% c("current", "ex", "never"),]
+table(df$smoking_status)
+
+# table(df$subject)
+# table(df$gender)
+table(df$smoking_status, df$subject, df$gender)
+
+
+df$smoking_status = as.factor(df$smoking_status)
+table(df$smoking_status)
+levels(df$smoking_status)
+levels(df$smoking_status) = c("current", "former", "never")
+table(df$smoking_status)
+table(df$smoking_status, df$gender)
+
+df$never01 = ifelse(df$smoking_status=="never", 1, 0)
+df$former01 = ifelse(df$smoking_status=="former", 1, 0)
+df$current01 = ifelse(df$smoking_status=="current", 1, 0)
+
+idx_clinicals_oi = c("smoking_status", "never01", "former01", "current01")
+head(df[,idx_clinicals_oi], 20)
+
+idx_clinicals = c(idx_clinicals, "never01", "former01", "current01")
+df = df[,c(idx_clinicals, idx_cpg)]
+head(df[,1:6])
+dim(df)
+```
+
+# Build training and test sets
+
+```{r idx_train}
+print("Build and format training and test sets")
+
+nb_trains = 421
+tmp_df = df[,c("smoking_status", "subject", "gender")]
+foo = sapply(1:10000, function(i) {
+  set.seed(i)
+  idx_train = sample(rownames(df), nb_trains)
+  idx_test = sample(setdiff(rownames(df), idx_train))
+  fo = tmp_df[idx_train,]
+  foo = prop.table(table(df$smoking_status, df$subject, df$gender))
+  bar = prop.table(table(fo$smoking_status, fo$subject, fo$gender))
+  signif(sum((foo - bar)^2),3)  
+})
+i = which(foo==min(foo))
+i  
+foo[i]
+
+set.seed(i)
+idx_train = sample(rownames(df), nb_trains)
+idx_test = sample(setdiff(rownames(df), idx_train))
+
+signif(prop.table(table(tmp_df$smoking_status, tmp_df$subject, tmp_df$gender)                                    ),3)*100
+signif(prop.table(table(tmp_df[idx_train,]$smoking_status, tmp_df[idx_train,]$subject, tmp_df[idx_train,]$gender)),3)*100
+signif(prop.table(table(tmp_df[idx_test,]$smoking_status, tmp_df[idx_test,]$subject, tmp_df[idx_test,]$gender)),3)*100
+
+idx_clinicals = c("smoking_status", "never01", "former01", "current01")
+df = df[,c(idx_clinicals, idx_cpg)]
+head(df[,1:6])
+dim(df)
+```
+
+# EWAS
+
+
+```{r ewas, eval=TRUE}
+idx_sample_ewas = idx_train
+idx_sample_ewas = rownames(df)
+
+print("filtering EWAS top probes")
+x = as.matrix(df[idx_sample_ewas,idx_cpg])
+cpg_matrix = t(x)
+cpg_matrix = cpg_matrix - apply(cpg_matrix[,df$smoking_status == "current"], 1, mean) # TO FORCE "range(fit$p.value[,1])" to "[1] 1 1" 
+dim(cpg_matrix)
+
+y_key = "smoking_status"
+confounders = NULL
+nbewasprobes = 100000
+if (!is.null(confounders)) {
+  design_matrix <- model.matrix(formula(paste0("~", smoking_status, "+", paste0(confounders, collapse="+"))), df[idx_sample_ewas,idx_clinicals])    
+} else {
+  design_matrix <- model.matrix(formula(paste0("~", y_key)), df[idx_sample_ewas,idx_clinicals])    
+}
+dim(design_matrix)
+dim(cpg_matrix)
+fit = limma::lmFit(cpg_matrix, design_matrix)
+fit = limma::eBayes(fit) # compute moderated t-statistics, moderated F-statistic, and log-odds of differential expression by empirical Bayes moderation of the standard errors towards a global value
+range(fit$p.value[,1])
+
+# idx_cpg_oi = rownames(fit$p.value)[rank(fit$F.p.value) <= nbewasprobes]
+# plot(-log10(fit$p.value[,2]), -log10(fit$p.value[,3]), col=(rownames(fit$p.value) %in% idx_cpg_oi)+1, pch=".", xlim=c(0,10), ylim=c(0,10))
+# head(fit[1:6,])
+# dim(fit)
+# layout(t(1:2), respect=TRUE)
+# plot(-log10(fit$p.value[,2]), -log10(fit$F.p.value), col=(rownames(fit$p.value) %in% idx_cpg_oi)+1, pch=".", xlim=c(0,10), ylim=c(0,10))
+# plot(-log10(fit$p.value[,3]), -log10(fit$F.p.value), col=(rownames(fit$p.value) %in% idx_cpg_oi)+1, pch=".", xlim=c(0,10), ylim=c(0,10))
+# boxplot(cg05575921~smoking_status, df)
+# plot(density(df["cg05575921",]))
+
+# layout(matrix(1:6, 6), respect=TRUE)
+layout(t(1:2), respect=TRUE)
+for (k in 2) {
+  foo = data.frame(fit$p.value, F.p.value=fit$F.p.value)
+  # plot(density(-log10(foo$F.p.value)))
+  dim(foo)
+  foo = foo[foo$F.p.value>quantile(foo$F.p.value, 0.00001),]
+  dim(foo)
+  # plot(density(-log10(foo$F.p.value)))
+
+  foo = foo[order(-foo$F.p.value),]
+  head(foo)
+  foo$prob = seq(0, 1, length.out=nrow(foo))^k
+  # foo$prob = foo$prob/sum(foo$prob)
+  head(foo)
+  tail(foo)
+  set.seed(1)
+  idx_cpg_oi = sample(rownames(foo), nbewasprobes, prob=foo$prob)
+
+  # layout(t(1:2), respect=TRUE)
+  plot( (density(foo[idx_cpg_oi, ]$F.p.value)), col=2, main=k)
+  lines((density(foo[          , ]$F.p.value)))  
+}
+
+
+layout(t(1:2), respect=TRUE)
+smoothScatter(fit$coefficients[idx_cpg_oi, 2], fit$coefficients[idx_cpg_oi, 3], xlim=quantile(fit$coefficients[, 2], c(.01, .99)), ylim=quantile(fit$coefficients[, 3], c(.1, .9)))
+abline(h=0, v=0, col=2)
+smoothScatter(fit$coefficients[          , 2], fit$coefficients[          , 3], xlim=quantile(fit$coefficients[, 2], c(.01, .99)), ylim=quantile(fit$coefficients[, 3], c(.1, .9)))
+abline(h=0, v=0, col=2)
+
+layout(t(1:2), respect=TRUE)
+smoothScatter(fit$coefficients[idx_cpg_oi, 2], -log10(fit$p.value[idx_cpg_oi, 2]), xlim=quantile(fit$coefficients[, 2], c(.1, .9)), ylim=c(0, quantile(-log10(fit$p.value[, 2]),.99)))
+smoothScatter(fit$coefficients[          , 2], -log10(fit$p.value[          , 2]), xlim=quantile(fit$coefficients[, 2], c(.1, .9)), ylim=c(0, quantile(-log10(fit$p.value[, 2]),.99)))
+smoothScatter(fit$coefficients[idx_cpg_oi, 3], -log10(fit$p.value[idx_cpg_oi, 3]), xlim=quantile(fit$coefficients[, 3], c(.1, .9)), ylim=c(0, quantile(-log10(fit$p.value[, 3]),.99)))
+smoothScatter(fit$coefficients[          , 3], -log10(fit$p.value[          , 3]), xlim=quantile(fit$coefficients[, 3], c(.1, .9)), ylim=c(0, quantile(-log10(fit$p.value[, 3]),.99)))
+
+idx_cpg = intersect(idx_cpg, idx_cpg_oi)
+
+dim(df)
+df = df[,c(idx_clinicals, idx_cpg)]
+head(df[,1:6])
+dim(df)
+```
+
+# Selecting probes
+
+
+
+```{r idx_cpg}
+idx_cpgs = list()
+nb_probes = 10000
+for (i in 1:10) {
+  set.seed(i)
+  idx_cpgs[[i]] = sample(setdiff(idx_cpg, unlist(idx_cpgs)), nb_probes)
+}
+data_alter = lapply(2:length(idx_cpgs), function(i) {
+  print(paste0("Build alternativ dataset ", i, "."))
+  sub_df = df[, c(idx_clinicals, idx_cpgs[[i]])]
+  list(data_train = sub_df[idx_train,], data_test = sub_df[idx_test,])
+})
+idx_cpg = idx_cpgs[[1]]
+
+data_train = df[idx_train, c(idx_clinicals, idx_cpg)]
+data_test = df[idx_test, c(idx_clinicals, idx_cpg)]
+
+rownames(data_train) = paste0("TRAIN", sprintf(paste0("%0", nchar(nrow(data_train)), "d"), 1:nrow(data_train)))
+rownames(data_test) = paste0("TEST", sprintf(paste0("%0", nchar(nrow(data_test)), "d"), 1:nrow(data_test)))
+head(data_train[, 1:10])
+dim(data_train)
+head(data_test[, 1:10])
+dim(data_test)
+
+
+
+# # PCA there
+# d = as.matrix(data_train[,-(1:4)])
+# head(data_train[,1:10])
+# pca = prcomp(d, scale=TRUE)
+#
+# v = pca$sdev * pca$sdev
+# p = v / sum(v) * 100
+#
+# layout(matrix(1:6,2), respect=TRUE)
+# # layout(matrix(1:2,1), respect=TRUE)
+# barplot(p)
+#
+# for (i in 1:5) {
+#   j = i+1
+#   plot(pca$x[,i], pca$x[,j], xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"), ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"), pch=16, col=as.numeric(data_train[rownames(pca$x),]$smoking_status))
+#   scale_factor = min(abs(c(min(c(pca$x[,i], pca$x[,j])), max(c(pca$x[,i], pca$x[,j])))))
+#   # scale_factor = min(abs(c(max(min(pca$x[,i]), min(pca$x[,j])), min(max(pca$x[,i]), max(pca$x[,j])))))
+#   plotrix::draw.ellipse(0,0,scale_factor,scale_factor, lty=2, border="grey")
+#   # arrows(0,0,pca$rotation[,i]*scale_factor, pca$rotation[,j]*scale_factor, col="grey")
+#   # text(pca$rotation[,i]*scale_factor, pca$rotation[,j]*scale_factor, rownames(pca$rotation))
+# }
+```
+
+# Export training and test sets
+
+```{r export}
+print("Export training and test sets and truth")
+data_truth = data_test[,1]
+names(data_truth) = rownames(data_test)
+print(data_truth)
+
+data_test[,idx_clinicals] = NA
+head(data_test[, 1:10])
+dim(data_test)
+
+head(data_train[, 1:10])
+dim(data_train)
+
+saveRDS(object = data_train , file = "data_train.rds")
+saveRDS(object = data_test  , file = "data_test.rds" )
+saveRDS(object = data_truth , file = "data_truth.rds")
+saveRDS(object = data_alter , file = "data_alter.rds")
+```
+
+
+
+# Build model
+
+
+```{r model, fig.height=5, fig.width=10}
+x=data.matrix(data_train[,idx_cpg])
+y=data_train[,"smoking_status"]
+
+modelcva = glmnetUtils::cva.glmnet(x=x, y=y, family = "multinomial", standardize=TRUE, type.measure="class", alpha=c(1))#,, .125, .064))#, type.measure="mse", nlambda=100, lambda.min.ratio=.01)# )
+
+cvarecaps = data.frame(
+  lambda   = unlist(lapply(modelcva$modlist, "[[", "lambda")),
+  cvm      = unlist(lapply(modelcva$modlist, "[[", "cvm")   ),
+  cvup     = unlist(lapply(modelcva$modlist, "[[", "cvup")  ),
+  cvlo     = unlist(lapply(modelcva$modlist, "[[", "cvlo")  ),
+  nbprobes = unlist(lapply(modelcva$modlist, "[[", "nzero") ),
+  lambdamin= rep(unlist(lapply(modelcva$modlist, "[[", "lambda.min")) , sapply(lapply(modelcva$modlist, "[[", "lambda"), length)),
+  lambda1se= rep(unlist(lapply(modelcva$modlist, "[[", "lambda.1se")) , sapply(lapply(modelcva$modlist, "[[", "lambda"), length)),
+  alpha    = rep(modelcva$alpha                                       , sapply(lapply(modelcva$modlist, "[[", "lambda"), length))
+)
+head(cvarecaps)
+
+# cvarecaps$cvm   = -cvarecaps$cvm
+# cvarecaps$cvup = -cvarecaps$cvup
+# cvarecaps$cvlo = -cvarecaps$cvlo
+
+best_lambda   = max(cvarecaps[cvarecaps$cvm==min(cvarecaps$cvm),]$lambda)
+best_alpha    = cvarecaps[cvarecaps$cvm==min(cvarecaps$cvm) & cvarecaps$lambda==best_lambda,]$alpha[1]
+best_nbprobes = cvarecaps[cvarecaps$cvm==min(cvarecaps$cvm) & cvarecaps$lambda==best_lambda,]$nbprobes
+
+
+# Plotting cvm and nbprobes depending on alpha and lambda (with cv results)
+layout(matrix(1:2,1),respect = TRUE)
+main = paste0("Cross-Validation")
+
+plot(0, 0, col=0, xlab="log10(lambda)", ylab="misclassification error", main=main, xlim=log10(range(cvarecaps$lambda)) , ylim=range(cvarecaps$cvm))
+tmp_alphas = sort(unique(cvarecaps$alpha))
+foo = lapply(tmp_alphas, function(alpha) {
+  print(alpha)
+  cvarecap = cvarecaps[cvarecaps$alpha==alpha,]
+  sub_recap = cvarecap[cvarecap$lambda==cvarecap$lambdamin,]
+  # cvarecap = sub_cvarecaps[sub_cvarecaps$alpha==alpha,]
+  tmp_col = which(alpha==tmp_alphas)
+  lines(log10(cvarecap$lambda), cvarecap$cvm             , col=tmp_col, lty=2)
+  points(  log10(sub_recap$lambda), sub_recap$cvm  , col=tmp_col, pch=1)
+  cvarecap = cvarecaps[cvarecaps$alpha==alpha,]
+  if (best_alpha==alpha & best_lambda==sub_recap$lambda) {
+    points(  log10(sub_recap$lambda), sub_recap$cvm  , col=tmp_col, pch=16)
+    arrows(x0=log10(sub_recap$lambda), y0=sub_recap$cvlo, x1=log10(sub_recap$lambda), y1=sub_recap$cvup, code=3, angle=90, length = 0.03, col=tmp_col, lwd=2)
+    abline(h=sub_recap$cvm, v=log10(sub_recap$lambda), col=tmp_col)
+    legend("topright", paste0("error=", signif(sub_recap$cvm, 3), ", alpha=", signif(alpha, 3), ", lambda=", signif(sub_recap$lambda, 3)), lty=1, cex=.5)
+  }
+})
+
+plot(0, 0, col=0, xlab="log10(lambda)", ylab="nbprobes", main=main, xlim=log10(range(cvarecaps$lambda)), ylim=range(cvarecaps$nbprobes))
+foo = lapply(tmp_alphas, function(alpha) { 
+  print(alpha)
+  cvarecap = cvarecaps[cvarecaps$alpha==alpha,]
+  sub_recap = cvarecap[cvarecap$lambda==cvarecap$lambdamin,]
+  # cvarecap = sub_cvarecaps[sub_cvarecaps$alpha==alpha,]
+  tmp_col = which(alpha==tmp_alphas)
+  lines(log10(cvarecap$lambda), cvarecap$nbprobes             , col=tmp_col, lty=2)
+  points(  log10(sub_recap$lambda), sub_recap$nbprobes  , col=tmp_col, pch=1)
+  cvarecap = cvarecaps[cvarecaps$alpha==alpha,]
+  if (best_alpha==alpha & best_lambda==sub_recap$lambda) {
+    print(sub_recap)
+    points(  log10(sub_recap$lambda), sub_recap$nbprobes  , col=tmp_col, pch=16)
+    abline(h=sub_recap$nbprobes, v=log10(sub_recap$lambda), col=tmp_col)
+    legend("bottomleft", paste0("#probes=", signif(sub_recap$nbprobes, 3), ", alpha=", signif(alpha, 3), ", lambda=", signif(sub_recap$lambda, 3)), lty=1, cex=.5)
+  }
+})
+legend(x="topright", legend=tmp_alphas, fill=1:length(tmp_alphas), title="alpha", cex=.5)
+```
+
+# Evaluate model
+
+```{r prediction, echo=TRUE, results="verbatim"}
+print("NULL test")
+data_pred = rep(names(rev(sort(table(data_train[,"smoking_status"]))))[1], length(data_truth))
+foo = cbind(data_pred, as.character(data_truth))
+sum(foo[,1]==foo[,2]) / nrow(data_test)
+
+print("NULL training")
+data_pred = rep(names(rev(sort(table(data_train[,"smoking_status"]))))[1], nrow(data_train))
+foo = cbind(data_pred, as.character(data_train[,"smoking_status"]))
+sum(foo[,1]==foo[,2]) / nrow(data_train)
+
+
+
+lambda = best_lambda
+alpha =  best_alpha 
+lambda
+alpha
+
+x = data.matrix(data_train[,idx_cpg])
+y = data_train[,"smoking_status"]
+
+m = glmnet::glmnet(
+  x=x,
+  y=y,
+  standardize=TRUE,
+  alpha=alpha,
+  family = "multinomial",
+  lambda=lambda
+)
+print("data_test")
+data_pred = predict(m, newx=data.matrix(data_test[,idx_cpg]), type = c("class"))[,1]
+foo = cbind(data_pred, as.character(data_truth))
+sum(foo[,1]==foo[,2]) / nrow(data_test)
+ 
+print("data_train")
+data_pred = predict(m, newx=data.matrix(data_train[,idx_cpg]), type = c("class"))[,1]
+foo = cbind(data_pred, as.character(data_train[,"smoking_status"]))
+sum(foo[,1]==foo[,2]) / nrow(data_train)
+
+
+for (i in 0:length(data_alter)) {
+  print(paste0("************* i *************"))
+
+  if (i>0) {
+    data_train = data_alter[[i]]$data_train
+    data_test = data_alter[[i]]$data_test
+    data_truth = data_test[,1]
+
+    markers_start = grep("cg",colnames(data_train))[1]
+    idx_cpg = colnames(data_train)[markers_start:ncol(data_train)]
+  }
+  
+  x = data.matrix(data_train[,idx_cpg])
+  y = data_train[,"smoking_status"]
+
+  m = glmnet::glmnet(
+    x=x,
+    y=y,
+    standardize=TRUE,
+    alpha=alpha,
+    family = "multinomial",
+    lambda=lambda
+  )
+
+  print("#probes")
+  print(sum(apply(as.matrix(do.call(cbind,m$beta)) !=0, 1, any)))
+
+  print("data_train")
+  data_pred = predict(m, newx=data.matrix(data_train[,idx_cpg]), type = c("class"))[,1]
+  foo = cbind(data_pred, as.character(data_train[,"smoking_status"]))
+  print(sum(foo[,1]==foo[,2]) / nrow(data_train))
+
+  print("data_test")
+  data_pred = predict(m, newx=data.matrix(data_test[,idx_cpg]), type = c("class"))[,1]
+  foo = cbind(data_pred, as.character(data_truth))
+  print(sum(foo[,1]==foo[,2]) / nrow(data_test))
+ 
+  
+}
+
+```
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
