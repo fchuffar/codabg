@@ -8,14 +8,18 @@ automatically create a valid bundle by using the *R* terminal and `config.R` fil
 ## Generate a Codalab bundle
 
 In a *R* terminal, run the following command :
+
 ```
 system("bash clean.sh") ;  
 challenge_name="sexpred0.3"; 
-rmarkdown::render("generate_bundle.Rmd")
+rmarkdown::render("01_generate_bundle.Rmd")
 ```
 
-# Test the Codalab bundle
+## Test the Codalab bundle
 
 In a *R* terminal, run the following command :
-`rmarkdown::render(input = "Bundle_test.Rmd", envir = new.env( ) )`
+
+```
+rmarkdown::render("02_test_bundle.Rmd")
+```
 
