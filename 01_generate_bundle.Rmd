@@ -817,7 +817,7 @@ yaml::write_yaml(
 
 ```{r label = "GENERATOR - Generation datasets", include = FALSE}
 if (GENERATE_DATA) {
-    rmarkdown::render(input=generate_data_rmd_file, envir=new.env(), output_dir="./", intermediates_dir="./", knit_root_dir="./" )
+    rmarkdown::render(input=generate_data_rmd_file, output_dir="./", intermediates_dir="./", knit_root_dir="./" )
 }
 ```
 
